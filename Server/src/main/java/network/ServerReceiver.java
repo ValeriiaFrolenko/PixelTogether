@@ -2,6 +2,7 @@ package network;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+import com.google.inject.name.Named;
 import protocol.PacketStructure;
 
 import java.io.DataInputStream;
@@ -14,17 +15,17 @@ import java.util.function.Consumer;
 public class ServerReceiver implements Receiver, Runnable {
 
     private final Socket socket;
-    private final Consumer<byte[]> onMessageReceived;
+    private final Consumer<byte[]> pipeline;
     private final ConnectionManager connectionManager;
     private Byte sessionId = null;
     private DataInputStream in;
 
     @Inject
     public ServerReceiver(@Assisted Socket socket,
-                          Consumer<byte[]> onMessageReceived,
+                          @Named("decryptStep") Consumer<byte[]> decryptStep,
                           ConnectionManager connectionManager) {
         this.socket = socket;
-        this.onMessageReceived = onMessageReceived;
+        this.pipeline = decryptStep;
         this.connectionManager = connectionManager;
     }
 
@@ -39,7 +40,7 @@ public class ServerReceiver implements Receiver, Runnable {
                 .put(rest)
                 .array();
         registerSession(header);
-        onMessageReceived.accept(packet);
+        pipeline.accept(packet);
     }
 
     private void registerSession(byte[] header) {

@@ -4,15 +4,24 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
+import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Named;
 import database.ConnectionProvider;
 import database.ConnectionManager;
+import handler.CommandHandler;
+import handler.RegisterHandler;
+import model.Packet;
+import network.Sender;
 import network.ServerReceiver;
 import network.ServerReceiverFactory;
 import network.ServerSender;
-import network.Sender;
+import protocol.CommandType;
+import protocol.Decryptor;
 import protocol.DecryptorService;
+import protocol.Encryptor;
+import protocol.EncryptorService;
 
+import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
@@ -23,9 +32,16 @@ public class ServerModule extends AbstractModule {
     protected void configure() {
         bind(ConnectionProvider.class).to(ConnectionManager.class).in(Singleton.class);
         bind(Sender.class).to(ServerSender.class).in(Singleton.class);
+        bind(Encryptor.class).to(EncryptorService.class).in(Singleton.class);
+        bind(Decryptor.class).to(DecryptorService.class).in(Singleton.class);
+
         install(new FactoryModuleBuilder()
                 .implement(ServerReceiver.class, ServerReceiver.class)
                 .build(ServerReceiverFactory.class));
+
+        MapBinder<CommandType, CommandHandler> handlerBinder =
+                MapBinder.newMapBinder(binder(), CommandType.class, CommandHandler.class);
+        handlerBinder.addBinding(CommandType.REGISTER).to(RegisterHandler.class);
     }
 
     @Provides
@@ -37,5 +53,64 @@ public class ServerModule extends AbstractModule {
             throw new IllegalStateException("PIXEL_AES_KEY env variable must be set and 16 chars");
         }
         return key.getBytes();
+    }
+
+    @Provides
+    @Singleton
+    @Named("receiverPool")
+    ExecutorService provideReceiverPool() {
+        return Executors.newCachedThreadPool();
+    }
+
+    @Provides
+    @Singleton
+    @Named("decryptorPool")
+    ExecutorService provideDecryptorPool() {
+        return Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    }
+
+    @Provides
+    @Singleton
+    @Named("processorPool")
+    ExecutorService provideProcessorPool() {
+        return Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    }
+
+    @Provides
+    @Singleton
+    @Named("encryptorPool")
+    ExecutorService provideEncryptorPool() {
+        return Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    }
+
+    @Provides
+    @Singleton
+    @Named("senderPool")
+    ExecutorService provideSenderPool() {
+        return Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
+    }
+
+    @Provides
+    @Singleton
+    @Named("processStep")
+    Consumer<Packet> provideProcessStep(ProcessorService processorService,
+                                        @Named("processorPool") ExecutorService pool) {
+        return packet -> pool.submit(() -> processorService.process(packet));
+    }
+
+    @Provides
+    @Singleton
+    @Named("decryptStep")
+    Consumer<byte[]> provideDecryptStep(Decryptor decryptor,
+                                        @Named("decryptorPool") ExecutorService pool,
+                                        @Named("processStep") Consumer<Packet> processStep) {
+        return bytes -> pool.submit(() -> decryptor.decrypt(bytes, processStep));
+    }
+
+    @Provides
+    @Singleton
+    Consumer<Socket> provideSocketStep(ServerReceiverFactory receiverFactory,
+                                       @Named("receiverPool") ExecutorService pool) {
+        return socket -> pool.submit(receiverFactory.create(socket));
     }
 }

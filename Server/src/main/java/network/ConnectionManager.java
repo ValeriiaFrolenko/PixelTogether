@@ -10,37 +10,37 @@ import java.util.concurrent.ConcurrentHashMap;
 @Singleton
 public class ConnectionManager {
 
-    private final ConcurrentHashMap<Integer, Socket> sessionSockets = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, Socket>> roomSockets = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Byte, Socket> sessionSockets = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer, ConcurrentHashMap<Byte, Socket>> roomSockets = new ConcurrentHashMap<>();
 
-    public void register(int sessionId, Socket socket) {
+    public void register(byte sessionId, Socket socket) {
         sessionSockets.put(sessionId, socket);
     }
 
-    public void unregister(int sessionId) {
+    public void unregister(byte sessionId) {
         sessionSockets.remove(sessionId);
     }
 
-    public void assignRoom(int sessionId, int roomId) {
+    public void assignRoom(byte sessionId, int roomId) {
         Socket socket = sessionSockets.get(sessionId);
         if (socket != null) {
             roomSockets.computeIfAbsent(roomId, k -> new ConcurrentHashMap<>()).put(sessionId, socket);
         }
     }
 
-    public void leaveRoom(int sessionId, int roomId) {
-        ConcurrentHashMap<Integer, Socket> room = roomSockets.get(roomId);
+    public void leaveRoom(byte sessionId, int roomId) {
+        ConcurrentHashMap<Byte, Socket> room = roomSockets.get(roomId);
         if (room != null) {
             room.remove(sessionId);
         }
     }
 
-    public Socket getSocket(int sessionId) {
+    public Socket getSocket(byte sessionId) {
         return sessionSockets.get(sessionId);
     }
 
     public Collection<Socket> getSocketsByRoom(int roomId) {
-        ConcurrentHashMap<Integer, Socket> room = roomSockets.get(roomId);
+        ConcurrentHashMap<Byte, Socket> room = roomSockets.get(roomId);
         return room != null ? room.values() : Collections.emptyList();
     }
 }

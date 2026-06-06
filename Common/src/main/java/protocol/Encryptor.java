@@ -1,7 +1,8 @@
 package protocol;
 
 import model.Packet;
+import java.util.function.Consumer;
 
 public interface Encryptor {
-    byte[] encrypt(Packet packet);
+    void encrypt(Packet packet, Consumer<byte[]> next);
 }

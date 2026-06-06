@@ -1,42 +1,45 @@
-package core;
+package network;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import model.Packet;
-import network.Sender;
-import protocol.EncryptorService;
+import protocol.Encryptor;
 
 import java.util.concurrent.ExecutorService;
 
+@Singleton
 public class ResponseDispatcher {
 
-    private final EncryptorService encryptorService;
+    private final Encryptor encryptor;
     private final Sender sender;
     private final ExecutorService encryptorPool;
     private final ExecutorService senderPool;
 
     @Inject
-    public ResponseDispatcher(EncryptorService encryptorService,
+    public ResponseDispatcher(Encryptor encryptor,
                               Sender sender,
                               @Named("encryptorPool") ExecutorService encryptorPool,
                               @Named("senderPool") ExecutorService senderPool) {
-        this.encryptorService = encryptorService;
+        this.encryptor = encryptor;
         this.sender = sender;
         this.encryptorPool = encryptorPool;
         this.senderPool = senderPool;
     }
 
     public void sendToClient(byte sessionId, Packet packet) {
-        encryptorPool.submit(() -> {
-            byte[] encrypted = encryptorService.encrypt(packet);
-            senderPool.submit(() -> sender.sendToClient(sessionId, encrypted));
-        });
+        encryptorPool.submit(() ->
+                encryptor.encrypt(packet, encrypted ->
+                        senderPool.submit(() -> sender.sendToClient(sessionId, encrypted))
+                )
+        );
     }
 
     public void sendToRoom(int roomId, Packet packet) {
-        encryptorPool.submit(() -> {
-            byte[] encrypted = encryptorService.encrypt(packet);
-            senderPool.submit(() -> sender.sendToRoom(roomId, encrypted));
-        });
+        encryptorPool.submit(() ->
+                encryptor.encrypt(packet, encrypted ->
+                        senderPool.submit(() -> sender.sendToRoom(roomId, encrypted))
+                )
+        );
     }
 }

@@ -1,25 +1,23 @@
 package network;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import com.google.inject.Singleton;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.ExecutorService;
+import java.util.function.Consumer;
 
+@Singleton
 public class ServerListener implements Runnable {
 
     private static final int PORT = 8080;
 
-    private final ServerReceiverFactory receiverFactory;
-    private final ExecutorService clientPool;
+    private final Consumer<Socket> socketPipeline;
 
     @Inject
-    public ServerListener(ServerReceiverFactory receiverFactory,
-                          @Named("clientPool") ExecutorService clientPool) {
-        this.receiverFactory = receiverFactory;
-        this.clientPool = clientPool;
+    public ServerListener(Consumer<Socket> socketPipeline) {
+        this.socketPipeline = socketPipeline;
     }
 
     @Override
@@ -28,7 +26,7 @@ public class ServerListener implements Runnable {
             System.out.println("Server listening on port " + PORT);
             while (!Thread.currentThread().isInterrupted()) {
                 Socket socket = serverSocket.accept();
-                clientPool.submit(receiverFactory.create(socket));
+                socketPipeline.accept(socket);
             }
         } catch (IOException e) {
             System.err.println("ServerListener error: " + e.getMessage());

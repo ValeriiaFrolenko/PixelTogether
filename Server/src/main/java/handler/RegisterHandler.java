@@ -1,7 +1,7 @@
 package handler;
 
 import com.google.inject.Inject;
-import core.ResponseDispatcher;
+import network.ResponseDispatcher;
 import core.SessionManager;
 import database.dao.UserDao;
 import database.model.User;

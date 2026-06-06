@@ -12,8 +12,7 @@ public class ServerApp {
 
         injector.getInstance(DatabaseInitializer.class).initialize();
 
-        Thread listenerThread = new Thread(injector.getInstance(ServerListener.class));
-        listenerThread.start();
+        new Thread(injector.getInstance(ServerListener.class)).start();
 
         System.out.println("Server started");
     }

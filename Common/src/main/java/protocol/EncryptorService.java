@@ -2,6 +2,7 @@ package protocol;
 
 import com.google.inject.Inject;
 import model.Packet;
+import java.util.function.Consumer;
 
 public class EncryptorService implements Encryptor {
 
@@ -13,9 +14,10 @@ public class EncryptorService implements Encryptor {
     }
 
     @Override
-    public byte[] encrypt(Packet packet) {
+    public void encrypt(Packet packet, Consumer<byte[]> next) {
         try {
-            return encoder.encode(packet);
+            byte[] encrypted = encoder.encode(packet);
+            next.accept(encrypted);
         } catch (Exception e) {
             throw new RuntimeException("Failed to encrypt packet", e);
         }

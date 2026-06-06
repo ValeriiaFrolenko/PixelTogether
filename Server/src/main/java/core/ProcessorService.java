@@ -1,12 +1,14 @@
 package core;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import handler.CommandHandler;
 import model.Packet;
 import protocol.CommandType;
 
 import java.util.Map;
 
+@Singleton
 public class ProcessorService {
 
     private final Map<CommandType, CommandHandler> handlers;
