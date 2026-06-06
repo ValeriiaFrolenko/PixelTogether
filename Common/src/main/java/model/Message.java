@@ -1,37 +1,28 @@
 package model;
 
-public class Message{
-    private int cType;
-    private int bUserId;
-    private String message;
-
-    public Message(int cType, int bUserId, String message) {
-        this.cType = cType;
-        this.bUserId = bUserId;
-        this.message = message;
+public record Message(
+        int cType,
+        int sessionId,
+        int roomId,
+        byte[] payload
+) {
+    public static Builder builder() {
+        return new Builder();
     }
 
-    public int getcType() {
-        return cType;
-    }
+    public static class Builder {
+        private int cType;
+        private int sessionId;
+        private int roomId;
+        private byte[] payload;
 
-    public void setcType(int cType) {
-        this.cType = cType;
-    }
+        public Builder cType(int cType) { this.cType = cType; return this; }
+        public Builder sessionId(int sessionId) { this.sessionId = sessionId; return this; }
+        public Builder roomId(int roomId) { this.roomId = roomId; return this; }
+        public Builder payload(byte[] payload) { this.payload = payload; return this; }
 
-    public int getbUserId() {
-        return bUserId;
-    }
-
-    public void setbUserId(int bUserId) {
-        this.bUserId = bUserId;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
+        public Message build() {
+            return new Message(cType, sessionId, roomId, payload);
+        }
     }
 }

@@ -1,39 +1,25 @@
 package model;
 
-public class Packet {
-    private byte bSrc;
-    private long bPktId;
-    private Message bMsq;
-
-    public Packet() {}
-
-    public Packet(byte bSrc, long bPktId, Message bMsq) {
-        this.bSrc = bSrc;
-        this.bPktId = bPktId;
-        this.bMsq = bMsq;
+public record Packet(
+        byte bSrc,
+        long bPktId,
+        Message bMsg
+) {
+    public static Builder builder() {
+        return new Builder();
     }
 
-    public byte getbSrc() {
-        return bSrc;
-    }
+    public static class Builder {
+        private byte bSrc;
+        private long bPktId;
+        private Message bMsg;
 
-    public void setbSrc(byte bSrc) {
-        this.bSrc = bSrc;
-    }
+        public Builder bSrc(byte bSrc) { this.bSrc = bSrc; return this; }
+        public Builder bPktId(long bPktId) { this.bPktId = bPktId; return this; }
+        public Builder bMsg(Message bMsg) { this.bMsg = bMsg; return this; }
 
-    public long getbPktId() {
-        return bPktId;
-    }
-
-    public void setbPktId(long bPktId) {
-        this.bPktId = bPktId;
-    }
-
-    public Message getbMsq() {
-        return bMsq;
-    }
-
-    public void setbMsq(Message bMsq) {
-        this.bMsq = bMsq;
+        public Packet build() {
+            return new Packet(bSrc, bPktId, bMsg);
+        }
     }
 }

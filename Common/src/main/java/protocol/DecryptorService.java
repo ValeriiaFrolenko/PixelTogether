@@ -1,5 +1,6 @@
 package protocol;
 
+import com.google.inject.Inject;
 import model.Packet;
 
 import java.util.function.Consumer;
@@ -9,6 +10,7 @@ public class DecryptorService implements Decryptor {
     private final PacketDecoder packetDecoder;
     private final Consumer<Packet> onMessageReceived;
 
+    @Inject
     public DecryptorService(PacketDecoder packetDecoder, Consumer<Packet> onMessageReceived) {
         this.packetDecoder = packetDecoder;
         this.onMessageReceived = onMessageReceived;

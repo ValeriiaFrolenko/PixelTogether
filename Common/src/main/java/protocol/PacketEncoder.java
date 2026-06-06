@@ -1,5 +1,6 @@
 package protocol;
 
+import com.google.inject.Inject;
 import model.Message;
 import model.Packet;
 import utils.AesUtil;
@@ -7,23 +8,24 @@ import utils.Crc16;
 
 import java.nio.ByteBuffer;
 
-public class PacketEncoder{
+public class PacketEncoder {
 
     private final byte[] key;
 
+    @Inject
     public PacketEncoder(byte[] key) {
         this.key = key;
     }
 
     public byte[] encode(Packet packet) throws Exception {
         if (packet == null) {
-            throw new IllegalArgumentException("model.Packet cannot be null");
+            throw new IllegalArgumentException("Packet cannot be null");
         }
 
-        byte[] encryptedPayload = AesUtil.encrypt(packet.getbMsq().getMessage(), key);
+        byte[] encryptedPayload = AesUtil.encrypt(packet.bMsg().payload(), key);
 
         byte[] header = buildHeader(packet, encryptedPayload.length);
-        byte[] message = buildMessage(packet.getbMsq(), encryptedPayload);
+        byte[] message = buildMessage(packet.bMsg(), encryptedPayload);
 
         return buildResult(header, message);
     }
@@ -33,8 +35,8 @@ public class PacketEncoder{
 
         ByteBuffer header = ByteBuffer.allocate(PacketStructure.HEADER_SIZE);
         header.put(PacketStructure.MAGIC_BYTE);
-        header.put(packet.getbSrc());
-        header.putLong(packet.getbPktId());
+        header.put(packet.bSrc());
+        header.putLong(packet.bPktId());
         header.putInt(wLen);
         return header.array();
     }
@@ -43,14 +45,16 @@ public class PacketEncoder{
         ByteBuffer message = ByteBuffer.allocate(
                 MessageStructure.MESSAGE_HEADER_SIZE + encryptedPayload.length);
 
-        message.putInt(msg.getcType());
-        message.putInt(msg.getbUserId());
+        message.putInt(msg.cType());
+        message.putInt(msg.sessionId());
+        message.putInt(msg.roomId());
         message.put(encryptedPayload);
         return message.array();
     }
 
     private byte[] buildResult(byte[] header, byte[] message) {
-        ByteBuffer result = ByteBuffer.allocate(PacketStructure.MIN_PACKET_SIZE + message.length);
+        ByteBuffer result = ByteBuffer.allocate(
+                PacketStructure.MIN_PACKET_SIZE + message.length);
 
         result.put(header);
         result.putShort(Crc16.calculateCrc(header));

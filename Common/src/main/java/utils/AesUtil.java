@@ -1,32 +1,66 @@
 package utils;
 
 import javax.crypto.Cipher;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 
 public class AesUtil {
 
-    public static byte[] encrypt(String plainText, byte[] key) throws Exception {
-        if (plainText == null) {
-            plainText = "";
-        }
-        if (key == null || key.length != 16) {
-            throw new IllegalArgumentException("Key must be 16 bytes long for AES");
-        }
+    private static final String ALGORITHM = "AES/GCM/NoPadding";
+    private static final int GCM_IV_LENGTH = 12;
+    private static final int GCM_TAG_LENGTH = 128;
 
-        Cipher cipher = Cipher.getInstance("AES");
-        cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, "AES"));
-        return cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8));
+    private AesUtil() {}
+
+    public static byte[] encrypt(byte[] data, byte[] key) throws Exception {
+        if (data == null) data = new byte[0];
+        validateKey(key);
+
+        byte[] iv = generateIv();
+
+        Cipher cipher = Cipher.getInstance(ALGORITHM);
+        cipher.init(Cipher.ENCRYPT_MODE,
+                new SecretKeySpec(key, "AES"),
+                new GCMParameterSpec(GCM_TAG_LENGTH, iv));
+
+        byte[] encrypted = cipher.doFinal(data);
+
+        byte[] result = new byte[GCM_IV_LENGTH + encrypted.length];
+        System.arraycopy(iv, 0, result, 0, GCM_IV_LENGTH);
+        System.arraycopy(encrypted, 0, result, GCM_IV_LENGTH, encrypted.length);
+        return result;
     }
 
-    public static String decrypt(byte[] encryptedData, byte[] key) throws Exception {
-        if (key == null || key.length != 16) {
-            throw new IllegalArgumentException("Key must be 16 bytes long for AES");
+    public static byte[] decrypt(byte[] data, byte[] key) throws Exception {
+        validateKey(key);
+        if (data.length < GCM_IV_LENGTH) {
+            throw new IllegalArgumentException("Data too short");
         }
 
-        Cipher cipher = Cipher.getInstance("AES");
-        cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key, "AES"));
-        byte[] decrypted = cipher.doFinal(encryptedData);
-        return new String(decrypted, StandardCharsets.UTF_8);
+        byte[] iv = new byte[GCM_IV_LENGTH];
+        System.arraycopy(data, 0, iv, 0, GCM_IV_LENGTH);
+
+        byte[] encrypted = new byte[data.length - GCM_IV_LENGTH];
+        System.arraycopy(data, GCM_IV_LENGTH, encrypted, 0, encrypted.length);
+
+        Cipher cipher = Cipher.getInstance(ALGORITHM);
+        cipher.init(Cipher.DECRYPT_MODE,
+                new SecretKeySpec(key, "AES"),
+                new GCMParameterSpec(GCM_TAG_LENGTH, iv));
+
+        return cipher.doFinal(encrypted);
+    }
+
+    private static byte[] generateIv() {
+        byte[] iv = new byte[GCM_IV_LENGTH];
+        new SecureRandom().nextBytes(iv);
+        return iv;
+    }
+
+    private static void validateKey(byte[] key) {
+        if (key == null || (key.length != 16 && key.length != 24 && key.length != 32)) {
+            throw new IllegalArgumentException("Key must be 16, 24 or 32 bytes");
+        }
     }
 }

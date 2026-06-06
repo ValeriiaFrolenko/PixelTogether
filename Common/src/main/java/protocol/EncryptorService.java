@@ -1,5 +1,6 @@
 package protocol;
 
+import com.google.inject.Inject;
 import model.Packet;
 import java.util.function.Consumer;
 
@@ -8,6 +9,7 @@ public class EncryptorService implements Encryptor {
     private final PacketEncoder encoder;
     private final Consumer<byte[]> onMessageEncrypted;
 
+    @Inject
     public EncryptorService(PacketEncoder encoder, Consumer<byte[]> onMessageEncrypted) {
         this.encoder = encoder;
         this.onMessageEncrypted = onMessageEncrypted;
