@@ -1,6 +1,7 @@
 package protocol;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import model.Message;
 import model.Packet;
 import utils.AesUtil;
@@ -13,7 +14,7 @@ public class PacketDecoder {
     private final byte[] key;
 
     @Inject
-    public PacketDecoder(byte[] key) {
+    public PacketDecoder(@Named("aesKey") byte[] key) {
         this.key = key;
     }
 
@@ -25,7 +26,7 @@ public class PacketDecoder {
         ByteBuffer buffer = ByteBuffer.wrap(data);
 
         validateMagic(buffer);
-        byte bSrc = buffer.get();
+        byte sessionId = buffer.get();
         long bPktId = buffer.getLong();
         int wLen = buffer.getInt();
 
@@ -33,7 +34,6 @@ public class PacketDecoder {
         validateHeaderCrc(buffer, data);
 
         int cType = buffer.getInt();
-        int sessionId = buffer.getInt();
         int roomId = buffer.getInt();
 
         byte[] encryptedPayload = readPayload(buffer, wLen);
@@ -42,11 +42,10 @@ public class PacketDecoder {
         byte[] payload = AesUtil.decrypt(encryptedPayload, key);
 
         return Packet.builder()
-                .bSrc(bSrc)
+                .sessionId(sessionId)
                 .bPktId(bPktId)
                 .bMsg(Message.builder()
                         .cType(cType)
-                        .sessionId(sessionId)
                         .roomId(roomId)
                         .payload(payload)
                         .build())

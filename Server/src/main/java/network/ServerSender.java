@@ -1,6 +1,7 @@
 package network;
 
 import com.google.inject.Inject;
+import protocol.PacketStructure;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -16,7 +17,7 @@ public class ServerSender implements Sender {
     }
 
     @Override
-    public void sendToClient(int sessionId, byte[] packet) {
+    public void sendToClient(byte sessionId, byte[] packet) {
         Socket socket = connectionManager.getSocket(sessionId);
         if (socket == null) return;
         send(socket, packet);

@@ -1,6 +1,7 @@
 package protocol;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import model.Message;
 import model.Packet;
 import utils.AesUtil;
@@ -13,7 +14,7 @@ public class PacketEncoder {
     private final byte[] key;
 
     @Inject
-    public PacketEncoder(byte[] key) {
+    public PacketEncoder(@Named("aesKey") byte[] key) {
         this.key = key;
     }
 
@@ -23,7 +24,6 @@ public class PacketEncoder {
         }
 
         byte[] encryptedPayload = AesUtil.encrypt(packet.bMsg().payload(), key);
-
         byte[] header = buildHeader(packet, encryptedPayload.length);
         byte[] message = buildMessage(packet.bMsg(), encryptedPayload);
 
@@ -35,7 +35,7 @@ public class PacketEncoder {
 
         ByteBuffer header = ByteBuffer.allocate(PacketStructure.HEADER_SIZE);
         header.put(PacketStructure.MAGIC_BYTE);
-        header.put(packet.bSrc());
+        header.put(packet.sessionId());
         header.putLong(packet.bPktId());
         header.putInt(wLen);
         return header.array();
@@ -46,7 +46,6 @@ public class PacketEncoder {
                 MessageStructure.MESSAGE_HEADER_SIZE + encryptedPayload.length);
 
         message.putInt(msg.cType());
-        message.putInt(msg.sessionId());
         message.putInt(msg.roomId());
         message.put(encryptedPayload);
         return message.array();

@@ -2,7 +2,6 @@ package network;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-import protocol.MessageStructure;
 import protocol.PacketStructure;
 
 import java.io.DataInputStream;
@@ -17,7 +16,7 @@ public class ServerReceiver implements Receiver, Runnable {
     private final Socket socket;
     private final Consumer<byte[]> onMessageReceived;
     private final ConnectionManager connectionManager;
-    private Integer sessionId = null;
+    private Byte sessionId = null;
     private DataInputStream in;
 
     @Inject
@@ -39,14 +38,13 @@ public class ServerReceiver implements Receiver, Runnable {
                 .put(header)
                 .put(rest)
                 .array();
-        registerSession(packet);
+        registerSession(header);
         onMessageReceived.accept(packet);
     }
 
-    private void registerSession(byte[] packet) {
+    private void registerSession(byte[] header) {
         if (sessionId == null) {
-            sessionId = ByteBuffer.wrap(packet)
-                    .getInt(PacketStructure.OFFSET_MSG + MessageStructure.OFFSET_SESSION_ID);
+            sessionId = header[PacketStructure.OFFSET_SESSION_ID];
             connectionManager.register(sessionId, socket);
         }
     }

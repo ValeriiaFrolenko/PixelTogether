@@ -1,7 +1,7 @@
 package model;
 
 public record Packet(
-        byte bSrc,
+        byte sessionId,
         long bPktId,
         Message bMsg
 ) {
@@ -10,16 +10,16 @@ public record Packet(
     }
 
     public static class Builder {
-        private byte bSrc;
+        private byte sessionId;
         private long bPktId;
         private Message bMsg;
 
-        public Builder bSrc(byte bSrc) { this.bSrc = bSrc; return this; }
+        public Builder sessionId(byte sessionId) { this.sessionId = sessionId; return this; }
         public Builder bPktId(long bPktId) { this.bPktId = bPktId; return this; }
         public Builder bMsg(Message bMsg) { this.bMsg = bMsg; return this; }
 
         public Packet build() {
-            return new Packet(bSrc, bPktId, bMsg);
+            return new Packet(sessionId, bPktId, bMsg);
         }
     }
 }
