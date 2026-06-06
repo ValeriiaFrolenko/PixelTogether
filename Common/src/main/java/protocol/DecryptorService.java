@@ -3,24 +3,19 @@ package protocol;
 import com.google.inject.Inject;
 import model.Packet;
 
-import java.util.function.Consumer;
-
 public class DecryptorService implements Decryptor {
 
-    private final PacketDecoder packetDecoder;
-    private final Consumer<Packet> onMessageReceived;
+    private final PacketDecoder decoder;
 
     @Inject
-    public DecryptorService(PacketDecoder packetDecoder, Consumer<Packet> onMessageReceived) {
-        this.packetDecoder = packetDecoder;
-        this.onMessageReceived = onMessageReceived;
+    public DecryptorService(PacketDecoder decoder) {
+        this.decoder = decoder;
     }
 
     @Override
-    public void decrypt(byte[] encryptedPacket) {
+    public Packet decrypt(byte[] encryptedPacket) {
         try {
-            Packet packet = packetDecoder.decode(encryptedPacket);
-            onMessageReceived.accept(packet);
+            return decoder.decode(encryptedPacket);
         } catch (Exception e) {
             throw new RuntimeException("Failed to decrypt packet", e);
         }

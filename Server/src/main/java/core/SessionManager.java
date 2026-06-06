@@ -53,4 +53,11 @@ public class SessionManager {
         Session session = sessions.get(sessionId);
         return session != null && session.userId() != null;
     }
+
+    public void updateNickname(byte sessionId, String nickname) {
+        Session session = sessions.get(sessionId);
+        if (session != null) {
+            sessions.put(sessionId, new Session(sessionId, session.userId(), nickname, session.roomId()));
+        }
+    }
 }
