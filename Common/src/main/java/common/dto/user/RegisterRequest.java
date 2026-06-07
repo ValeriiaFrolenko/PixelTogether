@@ -1,4 +1,4 @@
-package common.dto;
+package common.dto.user;
 
 public record RegisterRequest(
         String username,

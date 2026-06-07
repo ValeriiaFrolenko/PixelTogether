@@ -7,4 +7,6 @@ module common {
     exports common.network;
     exports common.protocol;
     exports common.utils;
+    exports common.dto.user;
+    exports common.dto.room;
 }

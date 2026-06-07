@@ -9,7 +9,7 @@ import com.google.inject.name.Named;
 import server.database.ConnectionProvider;
 import server.database.ConnectionManager;
 import server.handler.CommandHandler;
-import server.handler.RegisterHandler;
+import server.handler.user.RegisterHandler;
 import common.model.Packet;
 import common.protocol.CommandType;
 import common.protocol.Decryptor;

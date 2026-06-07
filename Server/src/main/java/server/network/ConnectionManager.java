@@ -43,4 +43,9 @@ public class ConnectionManager {
         ConcurrentHashMap<Byte, Socket> room = roomSockets.get(roomId);
         return room != null ? room.values() : Collections.emptyList();
     }
+
+    public int countByRoom(int roomId) {
+        ConcurrentHashMap<Byte, Socket> room = roomSockets.get(roomId);
+        return room != null ? room.size() : 0;
+    }
 }

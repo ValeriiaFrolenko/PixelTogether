@@ -1,12 +1,14 @@
 package server.database.dao;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import server.database.JdbcTemplate;
 import server.database.model.Room;
 
 import java.util.List;
 import java.util.Optional;
 
+@Singleton
 public class RoomDao {
 
     private final JdbcTemplate jdbc;
