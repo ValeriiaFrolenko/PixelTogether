@@ -1,5 +1,5 @@
-# Created by https://www.toptal.com/developers/gitignore/api/intellij+all,java,maven,database
-# Edit at https://www.toptal.com/developers/gitignore?templates=intellij+all,java,maven,database
+# Created by https://www.toptal.com/developers/gitignore/api/intellij+all,java,maven,server.database
+# Edit at https://www.toptal.com/developers/gitignore?templates=intellij+all,java,maven,server.database
 
 .env
 
@@ -146,4 +146,4 @@ buildNumber.properties
 # JDT-specific (Eclipse Java Development Tools)
 .classpath
 
-# End of https://www.toptal.com/developers/gitignore/api/intellij+all,java,maven,database
+# End of https://www.toptal.com/developers/gitignore/api/intellij+all,java,maven,server.database
