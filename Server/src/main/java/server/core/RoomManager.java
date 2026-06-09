@@ -6,6 +6,7 @@ import common.dto.PixelUpdate;
 import common.dto.room.CanvasStateResponse;
 import server.database.dao.RoomDao;
 import server.database.model.Room;
+import server.network.ConnectionManager;
 
 import java.nio.ByteBuffer;
 import java.time.LocalDateTime;
@@ -15,29 +16,34 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicIntegerArray;
 
 @Singleton
 public class RoomManager {
-
-    private record Point(int x, int y) {}
 
     private record ActiveRoom(
             Room room,
             int canvasW,
             int canvasH,
-            ConcurrentHashMap<Point, Integer> canvas
+            AtomicIntegerArray canvas
     ) {}
 
     private final ConcurrentHashMap<Integer, ActiveRoom> rooms = new ConcurrentHashMap<>();
     private final RoomDao roomDao;
+    private final ConnectionManager connectionManager;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     @Inject
-    public RoomManager(RoomDao roomDao) {
+    public RoomManager(RoomDao roomDao, ConnectionManager connectionManager) {
         this.roomDao = roomDao;
+        this.connectionManager = connectionManager;
         scheduler.scheduleAtFixedRate(this::flushAll, 1, 1, TimeUnit.SECONDS);
         scheduler.scheduleAtFixedRate(this::deleteExpired, 60, 60, TimeUnit.SECONDS);
         Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
+    }
+
+    private int index(int x, int y, int width) {
+        return y * width + x;
     }
 
     public long createRoom(Room room) {
@@ -47,7 +53,7 @@ public class RoomManager {
                 saved,
                 saved.canvasW(),
                 saved.canvasH(),
-                new ConcurrentHashMap<>()
+                new AtomicIntegerArray(saved.canvasW() * saved.canvasH())
         ));
         return roomId;
     }
@@ -55,11 +61,13 @@ public class RoomManager {
     public void deleteRoom(int roomId) {
         rooms.remove(roomId);
         roomDao.deleteById(roomId);
+        connectionManager.clearRoom(roomId);
     }
 
     public void deleteExpired() {
         rooms.entrySet().removeIf(entry -> {
             if (entry.getValue().room().expiresAt().isBefore(LocalDateTime.now())) {
+                connectionManager.clearRoom(entry.getKey());
                 roomDao.deleteById(entry.getKey());
                 return true;
             }
@@ -80,7 +88,7 @@ public class RoomManager {
         ActiveRoom active = rooms.get(roomId);
         if (active == null) return;
         for (PixelUpdate pixel : pixels) {
-            active.canvas().put(new Point(pixel.x(), pixel.y()), pixel.color());
+            active.canvas().set(index(pixel.x(), pixel.y(), active.canvasW()), pixel.color());
         }
     }
 
@@ -100,9 +108,8 @@ public class RoomManager {
         int w = active.canvasW();
         int h = active.canvasH();
         ByteBuffer buf = ByteBuffer.allocate(w * h * 4);
-        for (int y = 0; y < h; y++)
-            for (int x = 0; x < w; x++)
-                buf.putInt(active.canvas().getOrDefault(new Point(x, y), 0));
+        for (int i = 0; i < w * h; i++)
+            buf.putInt(active.canvas().get(i));
         return buf.array();
     }
 
@@ -119,9 +126,8 @@ public class RoomManager {
         int w = active.canvasW();
         int h = active.canvasH();
         int[] pixels = new int[w * h];
-        for (int y = 0; y < h; y++)
-            for (int x = 0; x < w; x++)
-                pixels[y * w + x] = active.canvas().getOrDefault(new Point(x, y), 0);
+        for (int i = 0; i < w * h; i++)
+            pixels[i] = active.canvas().get(i);
         return new CanvasStateResponse(w, h, pixels);
     }
 
