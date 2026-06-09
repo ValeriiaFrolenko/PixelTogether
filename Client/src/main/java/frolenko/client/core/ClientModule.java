@@ -8,7 +8,9 @@ import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Named;
 import common.model.Packet;
+import common.network.KeyStore;
 import common.protocol.*;
+import frolenko.client.network.ClientKeyStore;
 import frolenko.client.network.ClientReceiver;
 import frolenko.client.network.ClientReceiverFactory;
 import frolenko.client.network.ResponseManager;
@@ -24,6 +26,7 @@ public class ClientModule extends AbstractModule {
     protected void configure() {
         bind(Encryptor.class).to(EncryptorService.class).in(Singleton.class);
         bind(Decryptor.class).to(DecryptorService.class).in(Singleton.class);
+        bind(KeyStore.class).to(ClientKeyStore.class).in(Singleton.class);
 
         install(new FactoryModuleBuilder()
                 .implement(ClientReceiver.class, ClientReceiver.class)
@@ -34,22 +37,6 @@ public class ClientModule extends AbstractModule {
                 TypeLiteral.get(CommandType.class),
                 new TypeLiteral<Consumer<Packet>>(){}
         );
-    }
-
-    @Provides
-    @Singleton
-    @Named("aesKey")
-    byte[] provideAesKey() {
-        String key = System.getProperty("PIXEL_AES_KEY");
-
-        if (key == null) {
-            key = System.getenv("PIXEL_AES_KEY");
-        }
-
-        if (key == null || key.length() != 16) {
-            throw new IllegalStateException("PIXEL_AES_KEY env variable must be set and 16 chars");
-        }
-        return key.getBytes();
     }
 
     @Provides @Singleton @Named("receiverPool")

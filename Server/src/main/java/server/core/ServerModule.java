@@ -6,6 +6,7 @@ import com.google.inject.Singleton;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Named;
+import common.network.KeyStore;
 import server.database.ConnectionProvider;
 import server.database.ConnectionManager;
 import server.handler.CommandHandler;
@@ -23,6 +24,7 @@ import common.protocol.DecryptorService;
 import common.protocol.Encryptor;
 import common.protocol.EncryptorService;
 import server.network.Sender;
+import server.network.ServerKeyStore;
 import server.network.ServerReceiver;
 import server.network.ServerReceiverFactory;
 import server.network.ServerSender;
@@ -30,6 +32,7 @@ import server.network.ServerSender;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class ServerModule extends AbstractModule {
@@ -40,6 +43,7 @@ public class ServerModule extends AbstractModule {
         bind(Sender.class).to(ServerSender.class).in(Singleton.class);
         bind(Encryptor.class).to(EncryptorService.class).in(Singleton.class);
         bind(Decryptor.class).to(DecryptorService.class).in(Singleton.class);
+        bind(KeyStore.class).to(ServerKeyStore.class).in(Singleton.class);
 
         install(new FactoryModuleBuilder()
                 .implement(ServerReceiver.class, ServerReceiver.class)
@@ -54,21 +58,6 @@ public class ServerModule extends AbstractModule {
         handlerBinder.addBinding(CommandType.JOIN_ROOM_PUBLIC).to(JoinRoomPublicHandler.class);
         handlerBinder.addBinding(CommandType.JOIN_ROOM_PRIVATE).to(JoinRoomPrivateHandler.class);
         handlerBinder.addBinding(CommandType.GET_ROOMS).to(GetRoomsHandler.class);
-    }
-
-    @Provides
-    @Singleton
-    @Named("aesKey")
-    byte[] provideAesKey() {
-        String key = System.getProperty("PIXEL_AES_KEY");
-        if (key == null) {
-            key = System.getenv("PIXEL_AES_KEY");
-        }
-
-        if (key == null || key.length() != 16) {
-            throw new IllegalStateException("PIXEL_AES_KEY env variable must be set and 16 chars");
-        }
-        return key.getBytes();
     }
 
     @Provides
@@ -125,8 +114,8 @@ public class ServerModule extends AbstractModule {
 
     @Provides
     @Singleton
-    Consumer<Socket> provideSocketStep(ServerReceiverFactory receiverFactory,
-                                       @Named("receiverPool") ExecutorService pool) {
-        return socket -> pool.submit(receiverFactory.create(socket));
+    BiConsumer<Socket, byte[]> provideSocketStep(ServerReceiverFactory receiverFactory,
+                                                 @Named("receiverPool") ExecutorService pool) {
+        return (socket, aesKey) -> pool.submit(receiverFactory.create(socket, aesKey));
     }
 }

@@ -1,7 +1,6 @@
 package common.protocol;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import com.google.inject.Singleton;
 import common.model.Message;
 import common.model.Packet;
 import common.utils.AesUtil;
@@ -9,21 +8,15 @@ import common.utils.Crc16;
 
 import java.nio.ByteBuffer;
 
+@Singleton
 public class PacketEncoder {
 
-    private final byte[] key;
-
-    @Inject
-    public PacketEncoder(@Named("aesKey") byte[] key) {
-        this.key = key;
-    }
-
-    public byte[] encode(Packet packet) throws Exception {
+    public byte[] encode(Packet packet, byte[] aesKey) throws Exception {
         if (packet == null) {
             throw new IllegalArgumentException("Packet cannot be null");
         }
 
-        byte[] encryptedPayload = AesUtil.encrypt(packet.bMsg().payload(), key);
+        byte[] encryptedPayload = AesUtil.encrypt(packet.bMsg().payload(), aesKey);
         byte[] header = buildHeader(packet, encryptedPayload.length);
         byte[] message = buildMessage(packet.bMsg(), encryptedPayload);
 

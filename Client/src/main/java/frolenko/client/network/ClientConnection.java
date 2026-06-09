@@ -2,7 +2,12 @@ package frolenko.client.network;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import common.network.KeyStore;
+import common.utils.RsaUtil;
 
+import javax.crypto.KeyGenerator;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
@@ -15,18 +20,22 @@ public class ClientConnection {
 
     private final ClientReceiverService receiverService;
     private final ClientSenderService senderService;
+    private final KeyStore keyStore;
 
     @Inject
     public ClientConnection(ClientReceiverService receiverService,
-                            ClientSenderService senderService) {
+                            ClientSenderService senderService,
+                            KeyStore keyStore) {
         this.receiverService = receiverService;
         this.senderService = senderService;
+        this.keyStore = keyStore;
     }
 
     public void start() {
         while (!Thread.currentThread().isInterrupted()) {
             try (Socket socket = new Socket(HOST, PORT)) {
                 System.out.println("Connected to server");
+                performHandshake(socket);
                 senderService.connect(socket);
                 receiverService.connect(socket);
                 waitUntilDisconnected(socket);
@@ -38,8 +47,31 @@ public class ClientConnection {
                     Thread.currentThread().interrupt();
                     break;
                 }
+            } catch (Exception e) {
+                System.err.println("Handshake failed: " + e.getMessage());
             }
         }
+    }
+
+    private void performHandshake(Socket socket) throws Exception {
+        DataInputStream in = new DataInputStream(socket.getInputStream());
+        DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+
+        int publicKeyLength = in.readInt();
+        byte[] publicKeyBytes = in.readNBytes(publicKeyLength);
+        var publicKey = RsaUtil.publicKeyFromBytes(publicKeyBytes);
+
+        KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+        keyGen.init(128);
+        byte[] aesKey = keyGen.generateKey().getEncoded();
+
+        byte[] encryptedAesKey = RsaUtil.encrypt(aesKey, publicKey);
+        out.writeInt(encryptedAesKey.length);
+        out.write(encryptedAesKey);
+        out.flush();
+
+        keyStore.register(0, aesKey);
+        System.out.println("Handshake completed, AES key length: " + aesKey.length);
     }
 
     private void waitUntilDisconnected(Socket socket) {

@@ -1,7 +1,6 @@
 package common.protocol;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import com.google.inject.Singleton;
 import common.model.Message;
 import common.model.Packet;
 import common.utils.AesUtil;
@@ -9,16 +8,10 @@ import common.utils.Crc16;
 
 import java.nio.ByteBuffer;
 
+@Singleton
 public class PacketDecoder {
 
-    private final byte[] key;
-
-    @Inject
-    public PacketDecoder(@Named("aesKey") byte[] key) {
-        this.key = key;
-    }
-
-    public Packet decode(byte[] data) throws Exception {
+    public Packet decode(byte[] data, byte[] aesKey) throws Exception {
         if (data == null || data.length < PacketStructure.MIN_PACKET_SIZE) {
             throw new IllegalArgumentException("Invalid packet data");
         }
@@ -39,7 +32,7 @@ public class PacketDecoder {
         byte[] encryptedPayload = readPayload(buffer, wLen);
         validateMessageCrc(buffer, data, wLen);
 
-        byte[] payload = AesUtil.decrypt(encryptedPayload, key);
+        byte[] payload = AesUtil.decrypt(encryptedPayload, aesKey);
 
         return Packet.builder()
                 .sessionId(sessionId)

@@ -3,6 +3,7 @@ package server.network;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.name.Named;
+import common.network.KeyStore;
 import common.network.Receiver;
 import common.protocol.PacketStructure;
 
@@ -16,18 +17,24 @@ import java.util.function.Consumer;
 public class ServerReceiver implements Receiver, Runnable {
 
     private final Socket socket;
+    private final byte[] aesKey;
     private final Consumer<byte[]> pipeline;
     private final ConnectionManager connectionManager;
+    private final KeyStore keyStore;
     private Long sessionId = null;
     private DataInputStream in;
 
     @Inject
     public ServerReceiver(@Assisted Socket socket,
+                          @Assisted byte[] aesKey,
                           @Named("decryptStep") Consumer<byte[]> pipeline,
-                          ConnectionManager connectionManager) {
+                          ConnectionManager connectionManager,
+                          KeyStore keyStore) {
         this.socket = socket;
+        this.aesKey = aesKey;
         this.pipeline = pipeline;
         this.connectionManager = connectionManager;
+        this.keyStore = keyStore;
     }
 
     @Override
@@ -48,6 +55,7 @@ public class ServerReceiver implements Receiver, Runnable {
         if (sessionId == null) {
             sessionId = ByteBuffer.wrap(header).getLong(PacketStructure.OFFSET_SESSION_ID);
             connectionManager.register(sessionId, socket);
+            keyStore.register(sessionId, aesKey);
         }
     }
 
@@ -77,6 +85,7 @@ public class ServerReceiver implements Receiver, Runnable {
         } finally {
             if (sessionId != null) {
                 connectionManager.unregister(sessionId);
+                keyStore.remove(sessionId);
             }
         }
     }
