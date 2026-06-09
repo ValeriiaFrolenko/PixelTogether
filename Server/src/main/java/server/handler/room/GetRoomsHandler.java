@@ -3,36 +3,35 @@ package server.handler.room;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import common.dto.room.RoomInfo;
+import common.utils.JsonUtil;
+import server.core.RoomManager;
+import server.handler.BaseHandler;
+import server.network.ConnectionManager;
+import server.network.ResponseDispatcher;
 import common.model.Message;
 import common.model.Packet;
 import common.protocol.CommandType;
-import common.utils.JsonUtil;
-import server.core.RoomManager;
-import server.handler.CommandHandler;
-import server.network.ConnectionManager;
-import server.network.ResponseDispatcher;
 
 import java.util.List;
 
 @Singleton
-public class GetRoomsHandler implements CommandHandler {
+public class GetRoomsHandler extends BaseHandler {
 
     private final RoomManager roomManager;
     private final ConnectionManager connectionManager;
-    private final ResponseDispatcher dispatcher;
 
     @Inject
     public GetRoomsHandler(RoomManager roomManager,
                            ConnectionManager connectionManager,
                            ResponseDispatcher dispatcher) {
+        super(dispatcher);
         this.roomManager = roomManager;
         this.connectionManager = connectionManager;
-        this.dispatcher = dispatcher;
     }
 
     @Override
     public void handle(Packet packet) {
-        byte sessionId = packet.sessionId();
+        long sessionId = packet.sessionId();
 
         List<RoomInfo> rooms = roomManager.getPublicRooms().stream()
                 .map(room -> new RoomInfo(

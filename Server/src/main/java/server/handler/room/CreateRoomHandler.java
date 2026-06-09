@@ -4,15 +4,12 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import common.dto.room.CreateRoomRequest;
 import common.dto.room.CreateRoomResponse;
-import common.dto.ErrorResponse;
-import common.model.Message;
-import common.model.Packet;
-import common.protocol.CommandType;
 import common.utils.JsonUtil;
+import server.core.ParticipantManager;
 import server.core.RoomManager;
-import server.core.SessionManager;
+import server.database.dao.AuthTokenDao;
 import server.database.model.Room;
-import server.handler.CommandHandler;
+import server.handler.BaseHandler;
 import server.network.ConnectionManager;
 import server.network.ResponseDispatcher;
 
@@ -20,35 +17,38 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Singleton
-public class CreateRoomHandler implements CommandHandler {
+public class CreateRoomHandler extends BaseHandler {
 
     private final RoomManager roomManager;
-    private final SessionManager sessionManager;
+    private final ParticipantManager participantManager;
+    private final AuthTokenDao authTokenDao;
     private final ConnectionManager connectionManager;
-    private final ResponseDispatcher dispatcher;
 
     @Inject
     public CreateRoomHandler(RoomManager roomManager,
-                             SessionManager sessionManager,
+                             ParticipantManager participantManager,
+                             AuthTokenDao authTokenDao,
                              ConnectionManager connectionManager,
                              ResponseDispatcher dispatcher) {
+        super(dispatcher);
         this.roomManager = roomManager;
-        this.sessionManager = sessionManager;
+        this.participantManager = participantManager;
+        this.authTokenDao = authTokenDao;
         this.connectionManager = connectionManager;
-        this.dispatcher = dispatcher;
     }
 
     @Override
-    public void handle(Packet packet) {
-        byte sessionId = packet.sessionId();
-        SessionManager.Session session = sessionManager.get(sessionId);
+    public void handle(common.model.Packet packet) {
+        long sessionId = packet.sessionId();
+        CreateRoomRequest request = JsonUtil.fromBytes(packet.bMsg().payload(), CreateRoomRequest.class);
 
-        if (session == null || !sessionManager.isAuthenticated(sessionId)) {
-            dispatcher.sendToClient(sessionId, buildError(sessionId, "Not authenticated"));
+        var userIdOpt = authTokenDao.findUserIdByToken(request.token());
+        if (userIdOpt.isEmpty()) {
+            sendError(sessionId, "Unauthorized");
             return;
         }
 
-        CreateRoomRequest request = JsonUtil.fromBytes(packet.bMsg().payload(), CreateRoomRequest.class);
+        int userId = userIdOpt.get();
 
         String code = request.isPrivate()
                 ? UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase()
@@ -57,36 +57,16 @@ public class CreateRoomHandler implements CommandHandler {
         long roomId = roomManager.createRoom(Room.builder()
                 .name(request.name())
                 .code(code)
-                .ownerId(session.userId())
+                .ownerId(userId)
                 .isPrivate(request.isPrivate())
                 .canvasW(request.canvasW())
                 .canvasH(request.canvasH())
                 .expiresAt(LocalDateTime.now().plusMinutes(request.durationMinutes()))
                 .build());
 
-        sessionManager.assignRoom(sessionId, (int) roomId);
+        String nickname = participantManager.assign(sessionId);
         connectionManager.assignRoom(sessionId, (int) roomId);
 
-        dispatcher.sendToClient(sessionId, Packet.builder()
-                .sessionId(sessionId)
-                .bPktId(0)
-                .bMsg(Message.builder()
-                        .cType(CommandType.OK.getCode())
-                        .roomId((int) roomId)
-                        .payload(JsonUtil.toBytes(new CreateRoomResponse(roomId, code)))
-                        .build())
-                .build());
-    }
-
-    private Packet buildError(byte sessionId, String message) {
-        return Packet.builder()
-                .sessionId(sessionId)
-                .bPktId(0)
-                .bMsg(Message.builder()
-                        .cType(CommandType.ERROR.getCode())
-                        .roomId(0)
-                        .payload(JsonUtil.toBytes(new ErrorResponse(message)))
-                        .build())
-                .build();
+        sendOk(sessionId, JsonUtil.toBytes(new CreateRoomResponse(roomId, code)));
     }
 }

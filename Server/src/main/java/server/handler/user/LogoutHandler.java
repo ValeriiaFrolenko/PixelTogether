@@ -2,45 +2,35 @@ package server.handler.user;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import common.model.Message;
-import common.model.Packet;
-import common.protocol.CommandType;
-import server.core.SessionManager;
-import server.handler.CommandHandler;
-import server.network.ConnectionManager;
+import common.dto.user.LogoutRequest;
+import common.utils.JsonUtil;
+import server.database.dao.AuthTokenDao;
+import server.handler.BaseHandler;
 import server.network.ResponseDispatcher;
 
 @Singleton
-public class LogoutHandler implements CommandHandler {
+public class LogoutHandler extends BaseHandler {
 
-    private final SessionManager sessionManager;
-    private final ConnectionManager connectionManager;
-    private final ResponseDispatcher dispatcher;
+    private final AuthTokenDao authTokenDao;
 
     @Inject
-    public LogoutHandler(SessionManager sessionManager,
-                         ConnectionManager connectionManager,
+    public LogoutHandler(AuthTokenDao authTokenDao,
                          ResponseDispatcher dispatcher) {
-        this.sessionManager = sessionManager;
-        this.connectionManager = connectionManager;
-        this.dispatcher = dispatcher;
+        super(dispatcher);
+        this.authTokenDao = authTokenDao;
     }
 
     @Override
-    public void handle(Packet packet) {
-        byte sessionId = packet.sessionId();
+    public void handle(common.model.Packet packet) {
+        long sessionId = packet.sessionId();
+        LogoutRequest request = JsonUtil.fromBytes(packet.bMsg().payload(), LogoutRequest.class);
 
-        sessionManager.unregister(sessionId);
-        connectionManager.unregister(sessionId);
+        if (!authTokenDao.existsByToken(request.token())) {
+            sendError(sessionId, "Unauthorized");
+            return;
+        }
 
-        dispatcher.sendToClient(sessionId, Packet.builder()
-                .sessionId(sessionId)
-                .bPktId(0)
-                .bMsg(Message.builder()
-                        .cType(CommandType.OK.getCode())
-                        .roomId(0)
-                        .payload(new byte[0])
-                        .build())
-                .build());
+        authTokenDao.deleteByToken(request.token());
+        sendOk(sessionId);
     }
 }

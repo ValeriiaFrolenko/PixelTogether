@@ -35,7 +35,7 @@ public class PacketEncoder {
 
         ByteBuffer header = ByteBuffer.allocate(PacketStructure.HEADER_SIZE);
         header.put(PacketStructure.MAGIC_BYTE);
-        header.put(packet.sessionId());
+        header.putLong(packet.sessionId());
         header.putLong(packet.bPktId());
         header.putInt(wLen);
         return header.array();
@@ -44,7 +44,6 @@ public class PacketEncoder {
     private byte[] buildMessage(Message msg, byte[] encryptedPayload) {
         ByteBuffer message = ByteBuffer.allocate(
                 MessageStructure.MESSAGE_HEADER_SIZE + encryptedPayload.length);
-
         message.putInt(msg.cType());
         message.putInt(msg.roomId());
         message.put(encryptedPayload);
@@ -54,12 +53,10 @@ public class PacketEncoder {
     private byte[] buildResult(byte[] header, byte[] message) {
         ByteBuffer result = ByteBuffer.allocate(
                 PacketStructure.MIN_PACKET_SIZE + message.length);
-
         result.put(header);
         result.putShort(Crc16.calculateCrc(header));
         result.put(message);
         result.putShort(Crc16.calculateCrc(message));
-
         return result.array();
     }
 }

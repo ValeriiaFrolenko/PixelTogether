@@ -12,7 +12,7 @@ import java.util.concurrent.ExecutorService;
 public class ResponseDispatcher {
 
     private final Encryptor encryptor;
-    private final server.network.Sender sender;
+    private final Sender sender;
     private final ExecutorService encryptorPool;
     private final ExecutorService senderPool;
 
@@ -27,7 +27,7 @@ public class ResponseDispatcher {
         this.senderPool = senderPool;
     }
 
-    public void sendToClient(byte sessionId, Packet packet) {
+    public void sendToClient(long sessionId, Packet packet) {
         encryptorPool.submit(() ->
                 encryptor.encrypt(packet, encrypted ->
                         senderPool.submit(() -> sender.sendToClient(sessionId, encrypted))

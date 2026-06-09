@@ -16,7 +16,7 @@ public class ServerSender implements Sender {
     }
 
     @Override
-    public void sendToClient(byte sessionId, byte[] packet) {
+    public void sendToClient(long sessionId, byte[] packet) {
         Socket socket = connectionManager.getSocket(sessionId);
         if (socket == null) return;
         send(socket, packet);

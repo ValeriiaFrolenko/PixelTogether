@@ -9,6 +9,12 @@ import com.google.inject.name.Named;
 import server.database.ConnectionProvider;
 import server.database.ConnectionManager;
 import server.handler.CommandHandler;
+import server.handler.room.CreateRoomHandler;
+import server.handler.room.GetRoomsHandler;
+import server.handler.room.JoinRoomPrivateHandler;
+import server.handler.room.JoinRoomPublicHandler;
+import server.handler.user.LoginHandler;
+import server.handler.user.LogoutHandler;
 import server.handler.user.RegisterHandler;
 import common.model.Packet;
 import common.protocol.CommandType;
@@ -42,6 +48,12 @@ public class ServerModule extends AbstractModule {
         MapBinder<CommandType, CommandHandler> handlerBinder =
                 MapBinder.newMapBinder(binder(), CommandType.class, CommandHandler.class);
         handlerBinder.addBinding(CommandType.REGISTER).to(RegisterHandler.class);
+        handlerBinder.addBinding(CommandType.LOGIN).to(LoginHandler.class);
+        handlerBinder.addBinding(CommandType.LOGOUT).to(LogoutHandler.class);
+        handlerBinder.addBinding(CommandType.CREATE_ROOM).to(CreateRoomHandler.class);
+        handlerBinder.addBinding(CommandType.JOIN_ROOM_PUBLIC).to(JoinRoomPublicHandler.class);
+        handlerBinder.addBinding(CommandType.JOIN_ROOM_PRIVATE).to(JoinRoomPrivateHandler.class);
+        handlerBinder.addBinding(CommandType.GET_ROOMS).to(GetRoomsHandler.class);
     }
 
     @Provides

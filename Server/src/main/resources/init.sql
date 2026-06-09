@@ -32,3 +32,9 @@ CREATE TABLE IF NOT EXISTS saved_works (
     canvas_h   INT          NOT NULL,
     saved_at   TIMESTAMP    NOT NULL DEFAULT NOW()
     );
+
+CREATE TABLE IF NOT EXISTS auth_tokens (
+                                           token      VARCHAR(64) PRIMARY KEY,
+                                           user_id    INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                                           created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);

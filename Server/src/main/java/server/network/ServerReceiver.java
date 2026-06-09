@@ -17,16 +17,16 @@ public class ServerReceiver implements Receiver, Runnable {
 
     private final Socket socket;
     private final Consumer<byte[]> pipeline;
-    private final server.network.ConnectionManager connectionManager;
-    private Byte sessionId = null;
+    private final ConnectionManager connectionManager;
+    private Long sessionId = null;
     private DataInputStream in;
 
     @Inject
     public ServerReceiver(@Assisted Socket socket,
-                          @Named("decryptStep") Consumer<byte[]> decryptStep,
-                          server.network.ConnectionManager connectionManager) {
+                          @Named("decryptStep") Consumer<byte[]> pipeline,
+                          ConnectionManager connectionManager) {
         this.socket = socket;
-        this.pipeline = decryptStep;
+        this.pipeline = pipeline;
         this.connectionManager = connectionManager;
     }
 
@@ -46,7 +46,7 @@ public class ServerReceiver implements Receiver, Runnable {
 
     private void registerSession(byte[] header) {
         if (sessionId == null) {
-            sessionId = header[PacketStructure.OFFSET_SESSION_ID];
+            sessionId = ByteBuffer.wrap(header).getLong(PacketStructure.OFFSET_SESSION_ID);
             connectionManager.register(sessionId, socket);
         }
     }

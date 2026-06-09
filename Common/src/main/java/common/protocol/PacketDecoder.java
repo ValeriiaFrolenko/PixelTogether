@@ -26,7 +26,7 @@ public class PacketDecoder {
         ByteBuffer buffer = ByteBuffer.wrap(data);
 
         validateMagic(buffer);
-        byte sessionId = buffer.get();
+        long sessionId = buffer.getLong();
         long bPktId = buffer.getLong();
         int wLen = buffer.getInt();
 

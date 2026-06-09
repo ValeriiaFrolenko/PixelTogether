@@ -1,7 +1,7 @@
 package common.model;
 
 public record Packet(
-        byte sessionId,
+        long sessionId,
         long bPktId,
         Message bMsg
 ) {
@@ -10,11 +10,11 @@ public record Packet(
     }
 
     public static class Builder {
-        private byte sessionId;
+        private long sessionId;
         private long bPktId;
         private Message bMsg;
 
-        public Builder sessionId(byte sessionId) { this.sessionId = sessionId; return this; }
+        public Builder sessionId(long sessionId) { this.sessionId = sessionId; return this; }
         public Builder bPktId(long bPktId) { this.bPktId = bPktId; return this; }
         public Builder bMsg(Message bMsg) { this.bMsg = bMsg; return this; }
 

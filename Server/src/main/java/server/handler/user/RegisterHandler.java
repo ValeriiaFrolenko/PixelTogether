@@ -3,37 +3,35 @@ package server.handler.user;
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import server.handler.CommandHandler;
-import server.network.ResponseDispatcher;
-import server.core.SessionManager;
+import common.dto.user.AuthResponse;
+import common.dto.user.RegisterRequest;
+import common.utils.JsonUtil;
+import server.database.dao.AuthTokenDao;
 import server.database.dao.UserDao;
 import server.database.model.User;
-import common.dto.ErrorResponse;
-import common.dto.user.RegisterRequest;
-import common.model.Message;
-import common.model.Packet;
-import common.protocol.CommandType;
-import common.utils.JsonUtil;
+import server.handler.BaseHandler;
+import server.network.ResponseDispatcher;
+
+import java.util.UUID;
 
 @Singleton
-public class RegisterHandler implements CommandHandler {
+public class RegisterHandler extends BaseHandler {
 
     private final UserDao userDao;
-    private final SessionManager sessionManager;
-    private final ResponseDispatcher dispatcher;
+    private final AuthTokenDao authTokenDao;
 
     @Inject
     public RegisterHandler(UserDao userDao,
-                           SessionManager sessionManager,
+                           AuthTokenDao authTokenDao,
                            ResponseDispatcher dispatcher) {
+        super(dispatcher);
         this.userDao = userDao;
-        this.sessionManager = sessionManager;
-        this.dispatcher = dispatcher;
+        this.authTokenDao = authTokenDao;
     }
 
     @Override
-    public void handle(Packet packet) {
-        byte sessionId = packet.sessionId();
+    public void handle(common.model.Packet packet) {
+        long sessionId = packet.sessionId();
         RegisterRequest request = JsonUtil.fromBytes(packet.bMsg().payload(), RegisterRequest.class);
 
         if (userDao.findByUsername(request.username()).isPresent()) {
@@ -43,39 +41,15 @@ public class RegisterHandler implements CommandHandler {
 
         String hashedPassword = BCrypt.withDefaults().hashToString(12, request.password().toCharArray());
 
-        long userId = userDao.save(User.builder()
+        int userId = (int) userDao.save(User.builder()
                 .username(request.username())
                 .password(hashedPassword)
                 .role("USER")
                 .build());
 
-        sessionManager.authenticate(sessionId, (int) userId);
-        sessionManager.updateNickname(sessionId, request.username());
+        String token = UUID.randomUUID().toString();
+        authTokenDao.save(token, userId);
 
-        dispatcher.sendToClient(sessionId, buildOk(sessionId));
-    }
-
-    private Packet buildOk(byte sessionId) {
-        return Packet.builder()
-                .sessionId(sessionId)
-                .bPktId(0)
-                .bMsg(Message.builder()
-                        .cType(CommandType.OK.getCode())
-                        .roomId(0)
-                        .payload(new byte[0])
-                        .build())
-                .build();
-    }
-
-    private void sendError(byte sessionId, String message) {
-        dispatcher.sendToClient(sessionId, Packet.builder()
-                .sessionId(sessionId)
-                .bPktId(0)
-                .bMsg(Message.builder()
-                        .cType(CommandType.ERROR.getCode())
-                        .roomId(0)
-                        .payload(JsonUtil.toBytes(new ErrorResponse(message)))
-                        .build())
-                .build());
+        sendOk(sessionId, JsonUtil.toBytes(new AuthResponse(token)));
     }
 }
