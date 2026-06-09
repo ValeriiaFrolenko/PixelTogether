@@ -10,10 +10,7 @@ import common.network.KeyStore;
 import server.database.ConnectionProvider;
 import server.database.ConnectionManager;
 import server.handler.CommandHandler;
-import server.handler.room.CreateRoomHandler;
-import server.handler.room.GetRoomsHandler;
-import server.handler.room.JoinRoomPrivateHandler;
-import server.handler.room.JoinRoomPublicHandler;
+import server.handler.room.*;
 import server.handler.user.LoginHandler;
 import server.handler.user.LogoutHandler;
 import server.handler.user.RegisterHandler;
@@ -58,6 +55,7 @@ public class ServerModule extends AbstractModule {
         handlerBinder.addBinding(CommandType.JOIN_ROOM_PUBLIC).to(JoinRoomPublicHandler.class);
         handlerBinder.addBinding(CommandType.JOIN_ROOM_PRIVATE).to(JoinRoomPrivateHandler.class);
         handlerBinder.addBinding(CommandType.GET_ROOMS).to(GetRoomsHandler.class);
+        handlerBinder.addBinding(CommandType.DRAW).to(DrawHandler.class);
     }
 
     @Provides

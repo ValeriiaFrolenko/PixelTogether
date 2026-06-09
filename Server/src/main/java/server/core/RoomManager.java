@@ -2,6 +2,7 @@ package server.core;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import common.dto.PixelUpdate;
 import common.dto.room.CanvasStateResponse;
 import server.database.dao.RoomDao;
 import server.database.model.Room;
@@ -18,9 +19,13 @@ import java.util.concurrent.TimeUnit;
 @Singleton
 public class RoomManager {
 
+    private record Point(int x, int y) {}
+
     private record ActiveRoom(
             Room room,
-            int[][] canvas
+            int canvasW,
+            int canvasH,
+            ConcurrentHashMap<Point, Integer> canvas
     ) {}
 
     private final ConcurrentHashMap<Integer, ActiveRoom> rooms = new ConcurrentHashMap<>();
@@ -38,8 +43,12 @@ public class RoomManager {
     public long createRoom(Room room) {
         long roomId = roomDao.save(room);
         Room saved = roomDao.findById((int) roomId).orElseThrow();
-        int[][] canvas = new int[saved.canvasH()][saved.canvasW()];
-        rooms.put(saved.id(), new ActiveRoom(saved, canvas));
+        rooms.put(saved.id(), new ActiveRoom(
+                saved,
+                saved.canvasW(),
+                saved.canvasH(),
+                new ConcurrentHashMap<>()
+        ));
         return roomId;
     }
 
@@ -58,11 +67,6 @@ public class RoomManager {
         });
     }
 
-    public int[][] getCanvas(int roomId) {
-        ActiveRoom active = rooms.get(roomId);
-        return active != null ? active.canvas() : null;
-    }
-
     public Room getRoom(int roomId) {
         ActiveRoom active = rooms.get(roomId);
         return active != null ? active.room() : null;
@@ -72,16 +76,17 @@ public class RoomManager {
         return rooms.containsKey(roomId);
     }
 
-    public void applyPixels(int roomId, int x, int y, int color) {
+    public void applyPixels(int roomId, List<PixelUpdate> pixels) {
         ActiveRoom active = rooms.get(roomId);
-        if (active != null) {
-            active.canvas()[y][x] = color;
+        if (active == null) return;
+        for (PixelUpdate pixel : pixels) {
+            active.canvas().put(new Point(pixel.x(), pixel.y()), pixel.color());
         }
     }
 
     public void flushAll() {
         rooms.forEach((roomId, active) -> {
-            byte[] state = serializeCanvas(active.canvas());
+            byte[] state = serializeCanvas(active);
             roomDao.updateCanvasState(roomId, state);
         });
     }
@@ -91,13 +96,13 @@ public class RoomManager {
         scheduler.shutdown();
     }
 
-    private byte[] serializeCanvas(int[][] canvas) {
-        int h = canvas.length;
-        int w = canvas[0].length;
+    private byte[] serializeCanvas(ActiveRoom active) {
+        int w = active.canvasW();
+        int h = active.canvasH();
         ByteBuffer buf = ByteBuffer.allocate(w * h * 4);
-        for (int[] row : canvas)
-            for (int color : row)
-                buf.putInt(color);
+        for (int y = 0; y < h; y++)
+            for (int x = 0; x < w; x++)
+                buf.putInt(active.canvas().getOrDefault(new Point(x, y), 0));
         return buf.array();
     }
 
@@ -111,12 +116,12 @@ public class RoomManager {
     public CanvasStateResponse getCanvasState(int roomId) {
         ActiveRoom active = rooms.get(roomId);
         if (active == null) return null;
-        int h = active.canvas().length;
-        int w = active.canvas()[0].length;
+        int w = active.canvasW();
+        int h = active.canvasH();
         int[] pixels = new int[w * h];
         for (int y = 0; y < h; y++)
             for (int x = 0; x < w; x++)
-                pixels[y * w + x] = active.canvas()[y][x];
+                pixels[y * w + x] = active.canvas().getOrDefault(new Point(x, y), 0);
         return new CanvasStateResponse(w, h, pixels);
     }
 
