@@ -3,6 +3,7 @@ package server.database.dao;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import server.database.JdbcTemplate;
+import server.database.QueryBuilder;
 import server.database.model.SavedWork;
 
 import java.util.List;
@@ -27,10 +28,11 @@ public class SavedWorkDao {
 
     public Optional<SavedWork> findById(int id) {
         return jdbc.queryOne(
-                "SELECT * FROM saved_works WHERE id = ?",
+                "SELECT sw.*, u.username AS owner_username FROM saved_works sw JOIN users u ON sw.owner_id = u.id WHERE sw.id = ?",
                 rs -> SavedWork.builder()
                         .id(rs.getInt("id"))
                         .ownerId(rs.getInt("owner_id"))
+                        .ownerUsername(rs.getString("owner_username"))
                         .title(rs.getString("title"))
                         .isPublic(rs.getBoolean("is_public"))
                         .imageData(rs.getBytes("image_data"))
@@ -42,28 +44,42 @@ public class SavedWorkDao {
         );
     }
 
-    public List<SavedWork> findAllPublic() {
+    public List<SavedWork> findPublicFiltered(String title, String ownerUsername) {
+        QueryBuilder qb = new QueryBuilder(
+                "SELECT sw.*, u.username AS owner_username FROM saved_works sw JOIN users u ON sw.owner_id = u.id WHERE sw.is_public = TRUE"
+        );
+        if (title != null) {
+            qb.and("LOWER(sw.title) LIKE LOWER(?)", "%" + title + "%");
+        }
+        if (ownerUsername != null) {
+            qb.and("LOWER(u.username) LIKE LOWER(?)", "%" + ownerUsername + "%");
+        }
+        qb.orderBy("saved_at", QueryBuilder.Direction.DESC);
+
         return jdbc.query(
-                "SELECT * FROM saved_works WHERE is_public = TRUE ORDER BY saved_at DESC",
+                qb.sql(),
                 rs -> SavedWork.builder()
                         .id(rs.getInt("id"))
                         .ownerId(rs.getInt("owner_id"))
+                        .ownerUsername(rs.getString("owner_username"))
                         .title(rs.getString("title"))
                         .isPublic(true)
                         .imageData(rs.getBytes("image_data"))
                         .canvasW(rs.getInt("canvas_w"))
                         .canvasH(rs.getInt("canvas_h"))
                         .savedAt(rs.getTimestamp("saved_at").toLocalDateTime())
-                        .build()
+                        .build(),
+                qb.params()
         );
     }
 
     public List<SavedWork> findAllByOwner(int ownerId) {
         return jdbc.query(
-                "SELECT * FROM saved_works WHERE owner_id = ? ORDER BY saved_at DESC",
+                "SELECT sw.*, u.username AS owner_username FROM saved_works sw JOIN users u ON sw.owner_id = u.id WHERE sw.owner_id = ? ORDER BY sw.saved_at DESC",
                 rs -> SavedWork.builder()
                         .id(rs.getInt("id"))
                         .ownerId(rs.getInt("owner_id"))
+                        .ownerUsername(rs.getString("owner_username"))
                         .title(rs.getString("title"))
                         .isPublic(rs.getBoolean("is_public"))
                         .imageData(rs.getBytes("image_data"))

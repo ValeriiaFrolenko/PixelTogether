@@ -24,4 +24,8 @@ module server {
     opens server.handler.user to com.google.guice;
     exports server.handler.room;
     opens server.handler.room to com.google.guice;
+    exports server.handler.draw;
+    opens server.handler.draw to com.google.guice;
+    exports server.handler.work;
+    opens server.handler.work to com.google.guice;
 }

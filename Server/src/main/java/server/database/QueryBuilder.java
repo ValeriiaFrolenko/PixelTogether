@@ -16,6 +16,7 @@ public class QueryBuilder {
     }
 
     private final String baseQuery;
+    private final boolean baseHasWhere;
     private final List<String> conditions = new ArrayList<>();
     private final List<Object> params = new ArrayList<>();
     private String orderBy;
@@ -24,6 +25,7 @@ public class QueryBuilder {
 
     public QueryBuilder(String baseQuery) {
         this.baseQuery = baseQuery;
+        this.baseHasWhere = baseQuery.toUpperCase().contains(" WHERE ");
     }
 
     public QueryBuilder and(String condition, Object... conditionParams) {
@@ -58,7 +60,7 @@ public class QueryBuilder {
         StringBuilder sb = new StringBuilder(baseQuery);
 
         if (!conditions.isEmpty()) {
-            sb.append(" WHERE ");
+            sb.append(baseHasWhere ? " AND " : " WHERE ");
             sb.append(String.join(" AND ", conditions));
         }
 

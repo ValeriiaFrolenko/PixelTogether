@@ -1,9 +1,9 @@
-package server.handler.room;
+package server.handler.draw;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import common.dto.PixelUpdate;
-import common.dto.room.DrawRequest;
+import common.dto.draw.PixelUpdate;
+import common.dto.draw.DrawRequest;
 import common.utils.JsonUtil;
 import server.core.RoomManager;
 import server.handler.BaseHandler;

@@ -1,17 +1,5 @@
 package common.protocol;
 
-/**
- * Command types for the PixelTogether server.protocol.
- *
- * Client → Server:
- *   AUTH group    - authentication and session management
- *   ROOM group    - room management
- *   DRAW group    - drawing actions
- *   WORK group    - saving and gallery
- *
- * Server → Client:
- *   RESPONSE group - server responses and broadcasts
- */
 public enum CommandType {
 
     // --- AUTH ---
@@ -33,6 +21,8 @@ public enum CommandType {
     // --- WORK ---
     SAVE_WORK(30),
     GET_GALLERY(31),
+    GET_WORK(32),
+    DELETE_WORK(33),
 
     // --- SERVER RESPONSES ---
     OK(100),
@@ -40,9 +30,10 @@ public enum CommandType {
     ROOM_LIST(102),
     CANVAS_STATE(103),
     GALLERY(104),
-    ROOM_UPDATE(105),
-    PARTICIPANT_JOINED(106),
-    PARTICIPANT_LEFT(107);
+    WORK(105),
+    ROOM_UPDATE(106),
+    PARTICIPANT_JOINED(107),
+    PARTICIPANT_LEFT(108);
 
     private final int code;
 

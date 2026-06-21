@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 public record SavedWork(
         int id,
         int ownerId,
+        String ownerUsername,
         String title,
         boolean isPublic,
         byte[] imageData,
@@ -19,6 +20,7 @@ public record SavedWork(
     public static class Builder {
         private int id;
         private int ownerId;
+        private String ownerUsername;
         private String title;
         private boolean isPublic;
         private byte[] imageData;
@@ -28,6 +30,7 @@ public record SavedWork(
 
         public Builder id(int id) { this.id = id; return this; }
         public Builder ownerId(int ownerId) { this.ownerId = ownerId; return this; }
+        public Builder ownerUsername(String ownerUsername) { this.ownerUsername = ownerUsername; return this; }
         public Builder title(String title) { this.title = title; return this; }
         public Builder isPublic(boolean isPublic) { this.isPublic = isPublic; return this; }
         public Builder imageData(byte[] imageData) { this.imageData = imageData; return this; }
@@ -36,7 +39,7 @@ public record SavedWork(
         public Builder savedAt(LocalDateTime savedAt) { this.savedAt = savedAt; return this; }
 
         public SavedWork build() {
-            return new SavedWork(id, ownerId, title, isPublic, imageData, canvasW, canvasH, savedAt);
+            return new SavedWork(id, ownerId, ownerUsername, title, isPublic, imageData, canvasW, canvasH, savedAt);
         }
     }
 }

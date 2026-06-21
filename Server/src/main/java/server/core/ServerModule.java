@@ -10,6 +10,7 @@ import common.network.KeyStore;
 import server.database.ConnectionProvider;
 import server.database.ConnectionManager;
 import server.handler.CommandHandler;
+import server.handler.draw.DrawHandler;
 import server.handler.room.*;
 import server.handler.user.LoginHandler;
 import server.handler.user.LogoutHandler;
@@ -20,6 +21,10 @@ import common.protocol.Decryptor;
 import common.protocol.DecryptorService;
 import common.protocol.Encryptor;
 import common.protocol.EncryptorService;
+import server.handler.work.DeleteWorkHandler;
+import server.handler.work.GetGalleryHandler;
+import server.handler.work.GetWorkHandler;
+import server.handler.work.SaveWorkHandler;
 import server.network.Sender;
 import server.network.ServerKeyStore;
 import server.network.ServerReceiver;
@@ -48,70 +53,69 @@ public class ServerModule extends AbstractModule {
 
         MapBinder<CommandType, CommandHandler> handlerBinder =
                 MapBinder.newMapBinder(binder(), CommandType.class, CommandHandler.class);
+
+        // auth
         handlerBinder.addBinding(CommandType.REGISTER).to(RegisterHandler.class);
         handlerBinder.addBinding(CommandType.LOGIN).to(LoginHandler.class);
         handlerBinder.addBinding(CommandType.LOGOUT).to(LogoutHandler.class);
+
+        // room
         handlerBinder.addBinding(CommandType.CREATE_ROOM).to(CreateRoomHandler.class);
         handlerBinder.addBinding(CommandType.JOIN_ROOM_PUBLIC).to(JoinRoomPublicHandler.class);
         handlerBinder.addBinding(CommandType.JOIN_ROOM_PRIVATE).to(JoinRoomPrivateHandler.class);
+        handlerBinder.addBinding(CommandType.LEAVE_ROOM).to(LeaveRoomHandler.class);
+        handlerBinder.addBinding(CommandType.CLOSE_ROOM).to(CloseRoomHandler.class);
         handlerBinder.addBinding(CommandType.GET_ROOMS).to(GetRoomsHandler.class);
+
+        // draw
         handlerBinder.addBinding(CommandType.DRAW).to(DrawHandler.class);
+
+        // work
+        handlerBinder.addBinding(CommandType.SAVE_WORK).to(SaveWorkHandler.class);
+        handlerBinder.addBinding(CommandType.GET_GALLERY).to(GetGalleryHandler.class);
+        handlerBinder.addBinding(CommandType.GET_WORK).to(GetWorkHandler.class);
+        handlerBinder.addBinding(CommandType.DELETE_WORK).to(DeleteWorkHandler.class);
     }
 
-    @Provides
-    @Singleton
-    @Named("receiverPool")
+    @Provides @Singleton @Named("receiverPool")
     ExecutorService provideReceiverPool() {
         return Executors.newCachedThreadPool();
     }
 
-    @Provides
-    @Singleton
-    @Named("decryptorPool")
+    @Provides @Singleton @Named("decryptorPool")
     ExecutorService provideDecryptorPool() {
         return Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     }
 
-    @Provides
-    @Singleton
-    @Named("processorPool")
+    @Provides @Singleton @Named("processorPool")
     ExecutorService provideProcessorPool() {
         return Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     }
 
-    @Provides
-    @Singleton
-    @Named("encryptorPool")
+    @Provides @Singleton @Named("encryptorPool")
     ExecutorService provideEncryptorPool() {
         return Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     }
 
-    @Provides
-    @Singleton
-    @Named("senderPool")
+    @Provides @Singleton @Named("senderPool")
     ExecutorService provideSenderPool() {
         return Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
     }
 
-    @Provides
-    @Singleton
-    @Named("processStep")
+    @Provides @Singleton @Named("processStep")
     Consumer<Packet> provideProcessStep(ProcessorService processorService,
                                         @Named("processorPool") ExecutorService pool) {
         return packet -> pool.submit(() -> processorService.process(packet));
     }
 
-    @Provides
-    @Singleton
-    @Named("decryptStep")
+    @Provides @Singleton @Named("decryptStep")
     Consumer<byte[]> provideDecryptStep(Decryptor decryptor,
                                         @Named("decryptorPool") ExecutorService pool,
                                         @Named("processStep") Consumer<Packet> processStep) {
         return bytes -> pool.submit(() -> decryptor.decrypt(bytes, processStep));
     }
 
-    @Provides
-    @Singleton
+    @Provides @Singleton
     BiConsumer<Socket, byte[]> provideSocketStep(ServerReceiverFactory receiverFactory,
                                                  @Named("receiverPool") ExecutorService pool) {
         return (socket, aesKey) -> pool.submit(receiverFactory.create(socket, aesKey));

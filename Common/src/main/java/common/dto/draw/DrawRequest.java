@@ -1,6 +1,5 @@
-package common.dto.room;
+package common.dto.draw;
 
-import common.dto.PixelUpdate;
 import java.util.List;
 
 public record DrawRequest(

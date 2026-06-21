@@ -2,7 +2,7 @@ package server.core;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import common.dto.PixelUpdate;
+import common.dto.draw.PixelUpdate;
 import common.dto.room.CanvasStateResponse;
 import server.database.dao.RoomDao;
 import server.database.model.Room;

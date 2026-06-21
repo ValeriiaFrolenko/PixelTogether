@@ -9,4 +9,6 @@ module common {
     exports common.utils;
     exports common.dto.user;
     exports common.dto.room;
+    exports common.dto.draw;
+    exports common.dto.work;
 }
