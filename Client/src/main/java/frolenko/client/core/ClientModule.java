@@ -10,6 +10,9 @@ import com.google.inject.name.Named;
 import common.model.Packet;
 import common.network.KeyStore;
 import common.protocol.*;
+import frolenko.client.handler.DrawPushHandler;
+import frolenko.client.handler.ParticipantJoinedHandler;
+import frolenko.client.handler.ParticipantLeftHandler;
 import frolenko.client.network.ClientKeyStore;
 import frolenko.client.network.ClientReceiver;
 import frolenko.client.network.ClientReceiverFactory;
@@ -27,16 +30,20 @@ public class ClientModule extends AbstractModule {
         bind(Encryptor.class).to(EncryptorService.class).in(Singleton.class);
         bind(Decryptor.class).to(DecryptorService.class).in(Singleton.class);
         bind(KeyStore.class).to(ClientKeyStore.class).in(Singleton.class);
+        bind(AppState.class).in(Singleton.class);
 
         install(new FactoryModuleBuilder()
                 .implement(ClientReceiver.class, ClientReceiver.class)
                 .build(ClientReceiverFactory.class));
 
-        MapBinder.newMapBinder(
+        MapBinder<CommandType, Consumer<Packet>> pushBinder = MapBinder.newMapBinder(
                 binder(),
                 TypeLiteral.get(CommandType.class),
                 new TypeLiteral<Consumer<Packet>>(){}
         );
+        pushBinder.addBinding(CommandType.DRAW).to(DrawPushHandler.class);
+        pushBinder.addBinding(CommandType.PARTICIPANT_JOINED).to(ParticipantJoinedHandler.class);
+        pushBinder.addBinding(CommandType.PARTICIPANT_LEFT).to(ParticipantLeftHandler.class);
     }
 
     @Provides @Singleton @Named("receiverPool")
