@@ -1,0 +1,22 @@
+.custom-tab-pane .tab-header-area .tab-header-background {
+    -fx-background-color: #fff5f7;
+}
+
+.custom-tab-pane .tab {
+    -fx-background-color: #fce4ec;
+    -fx-background-radius: 4 4 0 0;
+    -fx-padding: 5 15;
+}
+
+.custom-tab-pane .tab:selected {
+    -fx-background-color: #f06292;
+}
+
+.custom-tab-pane .tab:selected .tab-label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.custom-tab-pane .tab .tab-label {
+    -fx-text-fill: #880e4f;
+}

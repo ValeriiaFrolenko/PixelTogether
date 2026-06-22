@@ -2,24 +2,26 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox spacing="10" style="-fx-padding: 15;" alignment="TOP_CENTER"
+<VBox spacing="20" style="-fx-padding: 30; -fx-background-color: #fff5f7;" alignment="TOP_CENTER"
       xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="frolenko.client.controller.tab.AccountTabController">
 
-    <VBox fx:id="guestPane" spacing="10" maxWidth="300">
-        <TextField fx:id="usernameField" promptText="Username"/>
-        <PasswordField fx:id="passwordField" promptText="Password"/>
-        <HBox spacing="10">
-            <Button text="Login" onAction="#onLogin" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
-            <Button text="Register" onAction="#onRegister" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+    <VBox fx:id="guestPane" spacing="12" maxWidth="300" alignment="TOP_CENTER" style="-fx-background-color: #ffffff; -fx-padding: 20; -fx-border-color: #f8bbd0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 4);">
+        <Label text="Authorization" style="-fx-font-weight: bold; -fx-font-size: 14; -fx-text-fill: #880e4f;"/>
+        <TextField fx:id="usernameField" promptText="Username" style="-fx-background-radius: 4; -fx-border-color: #f8bbd0; -fx-border-radius: 4; -fx-background-color: #ffffff;"/>
+        <PasswordField fx:id="passwordField" promptText="Password" style="-fx-background-radius: 4; -fx-border-color: #f8bbd0; -fx-border-radius: 4; -fx-background-color: #ffffff;"/>
+        <HBox spacing="10" alignment="CENTER">
+            <Button text="Login" onAction="#onLogin" prefWidth="100" style="-fx-background-color: #f06292; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 4; -fx-padding: 6 12;"/>
+            <Button text="Register" onAction="#onRegister" prefWidth="100" style="-fx-background-color: #fce4ec; -fx-border-color: #f06292; -fx-border-radius: 4; -fx-background-radius: 4; -fx-text-fill: #880e4f; -fx-font-weight: bold; -fx-padding: 6 12;"/>
         </HBox>
-        <Label fx:id="authErrorLabel" style="-fx-text-fill: red;"/>
+        <Label fx:id="authErrorLabel" style="-fx-text-fill: #d32f2f; -fx-font-size: 11;"/>
     </VBox>
 
-    <VBox fx:id="loggedInPane" spacing="10" maxWidth="300" visible="false" managed="false">
-        <Label fx:id="usernameLabel"/>
-        <Button text="Logout" onAction="#onLogout" maxWidth="Infinity"/>
+    <VBox fx:id="loggedInPane" spacing="15" maxWidth="300" visible="false" managed="false" alignment="TOP_CENTER" style="-fx-background-color: #ffffff; -fx-padding: 20; -fx-border-color: #f8bbd0; -fx-border-radius: 8; -fx-background-radius: 8;">
+        <Label text="Logged In As:" style="-fx-text-fill: #666666; -fx-font-size: 12;"/>
+        <Label fx:id="usernameLabel" style="-fx-font-weight: bold; -fx-font-size: 16; -fx-text-fill: #880e4f;"/>
+        <Button text="Logout" onAction="#onLogout" prefWidth="150" style="-fx-background-color: #ffffff; -fx-border-color: #f06292; -fx-border-radius: 4; -fx-background-radius: 4; -fx-text-fill: #880e4f; -fx-padding: 6 12;"/>
     </VBox>
 
 </VBox>

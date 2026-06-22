@@ -2,24 +2,27 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox spacing="10" style="-fx-padding: 15;"
+<VBox spacing="15" style="-fx-padding: 20; -fx-background-color: #fff5f7;" alignment="TOP_CENTER"
       xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="frolenko.client.controller.tab.RoomsTabController">
 
-    <HBox spacing="10" alignment="CENTER_LEFT">
-        <TextField fx:id="privateCodeField" promptText="Private room code" HBox.hgrow="ALWAYS"/>
-        <Button text="Join Private" onAction="#onJoinPrivate"/>
+    <HBox spacing="10" alignment="CENTER">
+        <TextField fx:id="privateCodeField" promptText="Private room code" prefWidth="250" style="-fx-background-radius: 4; -fx-border-color: #f8bbd0; -fx-border-radius: 4; -fx-background-color: #ffffff;"/>
+        <Button text="Join Private" onAction="#onJoinPrivate" style="-fx-background-color: #fce4ec; -fx-border-color: #f06292; -fx-border-radius: 4; -fx-background-radius: 4; -fx-text-fill: #880e4f; -fx-font-weight: bold; -fx-padding: 5 12;"/>
     </HBox>
 
-    <HBox spacing="10" alignment="CENTER_RIGHT">
-        <Button fx:id="createRoomButton" text="Create Room" onAction="#onCreateRoom"
-                visible="false" managed="false"/>
-        <Button text="Refresh" onAction="#onRefreshRooms"/>
+    <HBox spacing="15" alignment="CENTER">
+        <Button fx:id="createRoomButton" text="Create Room" onAction="#onCreateRoom" visible="false" managed="false" style="-fx-background-color: #fce4ec; -fx-border-color: #f06292; -fx-border-radius: 4; -fx-background-radius: 4; -fx-text-fill: #880e4f; -fx-font-weight: bold; -fx-padding: 5 12;"/>
+        <Button text="Refresh" onAction="#onRefreshRooms" style="-fx-background-color: #ffffff; -fx-border-color: #f8bbd0; -fx-border-radius: 4; -fx-background-radius: 4; -fx-text-fill: #880e4f; -fx-padding: 5 12;"/>
     </HBox>
 
-    <ListView fx:id="roomListView" VBox.vgrow="ALWAYS"/>
+    <ListView fx:id="roomListView" VBox.vgrow="ALWAYS" maxWidth="600" style="-fx-background-radius: 4; -fx-border-color: #f8bbd0; -fx-border-radius: 4; -fx-background-color: #ffffff;">
+        <placeholder>
+            <Label text="No rooms available" style="-fx-text-fill: #880e4f;"/>
+        </placeholder>
+    </ListView>
 
-    <Button text="Join" onAction="#onJoinPublic" maxWidth="Infinity"/>
+    <Button text="Join" onAction="#onJoinPublic" prefWidth="200" style="-fx-background-color: #f06292; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 4; -fx-padding: 8 16;"/>
 
 </VBox>

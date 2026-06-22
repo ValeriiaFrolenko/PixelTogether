@@ -2,20 +2,22 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox spacing="10" style="-fx-padding: 15;"
+<VBox spacing="15" style="-fx-padding: 20; -fx-background-color: #fff5f7;" alignment="TOP_CENTER"
       xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="frolenko.client.controller.tab.GalleryTabController">
 
-    <HBox spacing="10">
-        <TextField fx:id="titleFilter" promptText="Filter by title" HBox.hgrow="ALWAYS"
-                   onKeyReleased="#onFilterChanged"/>
-        <TextField fx:id="authorFilter" promptText="Filter by author" HBox.hgrow="ALWAYS"
-                   onKeyReleased="#onFilterChanged"/>
+    <HBox spacing="15" alignment="CENTER">
+        <TextField fx:id="titleFilter" promptText="Filter by title" prefWidth="200" onKeyReleased="#onFilterChanged" style="-fx-background-radius: 4; -fx-border-color: #f8bbd0; -fx-border-radius: 4; -fx-background-color: #ffffff;"/>
+        <TextField fx:id="authorFilter" promptText="Filter by author" prefWidth="200" onKeyReleased="#onFilterChanged" style="-fx-background-radius: 4; -fx-border-color: #f8bbd0; -fx-border-radius: 4; -fx-background-color: #ffffff;"/>
     </HBox>
 
-    <ListView fx:id="galleryListView" VBox.vgrow="ALWAYS"/>
+    <ListView fx:id="galleryListView" VBox.vgrow="ALWAYS" maxWidth="600" style="-fx-background-radius: 4; -fx-border-color: #f8bbd0; -fx-border-radius: 4; -fx-background-color: #ffffff;">
+        <placeholder>
+            <Label text="Gallery is empty" style="-fx-text-fill: #880e4f;"/>
+        </placeholder>
+    </ListView>
 
-    <Button text="View" onAction="#onViewWork" maxWidth="Infinity"/>
+    <Button text="View" onAction="#onViewWork" prefWidth="200" style="-fx-background-color: #f06292; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 4; -fx-padding: 8 16;"/>
 
 </VBox>

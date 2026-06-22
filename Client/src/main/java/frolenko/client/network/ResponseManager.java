@@ -1,6 +1,7 @@
 package frolenko.client.network;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import common.model.Packet;
 import common.protocol.CommandType;
 
@@ -8,6 +9,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
+@Singleton
 public class ResponseManager {
 
     private final ConcurrentHashMap<Long, Consumer<Packet>> callbacks = new ConcurrentHashMap<>();
