@@ -39,7 +39,7 @@ public class GetGalleryHandler extends BaseHandler {
                         w.title(),
                         w.canvasW(),
                         w.canvasH(),
-                        w.savedAt()
+                        w.savedAt().toString()
                 ))
                 .toList();
 
