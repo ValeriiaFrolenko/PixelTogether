@@ -6,6 +6,7 @@ module frolenko.client {
     requires common;
     requires com.google.guice;
     requires com.google.guice.extensions.assistedinject;
+    requires java.logging;
 
     opens frolenko.client to javafx.fxml, com.google.guice;
     opens frolenko.client.controller to javafx.fxml, com.google.guice;
