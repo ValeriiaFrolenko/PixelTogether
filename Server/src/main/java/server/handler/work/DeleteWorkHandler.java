@@ -37,13 +37,13 @@ public class DeleteWorkHandler extends BaseHandler {
 
         var userIdOpt = authTokenDao.findUserIdByToken(request.token());
         if (userIdOpt.isEmpty()) {
-            sendError(sessionId, "Unauthorized");
+            sendError(sessionId, packet.bPktId(), "Unauthorized");
             return;
         }
 
         var workOpt = savedWorkDao.findById(request.workId());
         if (workOpt.isEmpty()) {
-            sendError(sessionId, "Work not found");
+            sendError(sessionId, packet.bPktId(), "Work not found");
             return;
         }
 
@@ -53,12 +53,12 @@ public class DeleteWorkHandler extends BaseHandler {
         if (work.ownerId() != userId) {
             User user = userDao.findById(userId).orElse(null);
             if (user == null || !"ADMIN".equals(user.role())) {
-                sendError(sessionId, "Forbidden");
+                sendError(sessionId, packet.bPktId(), "Forbidden");
                 return;
             }
         }
 
         savedWorkDao.deleteById(request.workId());
-        sendOk(sessionId);
+        sendOk(sessionId, packet.bPktId());
     }
 }

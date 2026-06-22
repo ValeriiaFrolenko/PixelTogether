@@ -43,7 +43,7 @@ public class GetRoomsHandler extends BaseHandler {
 
         dispatcher.sendToClient(sessionId, Packet.builder()
                 .sessionId(sessionId)
-                .bPktId(0)
+                .bPktId(packet.bPktId())
                 .bMsg(Message.builder()
                         .cType(CommandType.ROOM_LIST.getCode())
                         .roomId(0)

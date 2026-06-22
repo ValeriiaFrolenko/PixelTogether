@@ -35,7 +35,7 @@ public class RegisterHandler extends BaseHandler {
         RegisterRequest request = JsonUtil.fromBytes(packet.bMsg().payload(), RegisterRequest.class);
 
         if (userDao.findByUsername(request.username()).isPresent()) {
-            sendError(sessionId, "Username already taken");
+            sendError(sessionId, packet.bPktId(), "Username already taken");
             return;
         }
 
@@ -50,6 +50,6 @@ public class RegisterHandler extends BaseHandler {
         String token = UUID.randomUUID().toString();
         authTokenDao.save(token, userId);
 
-        sendOk(sessionId, JsonUtil.toBytes(new AuthResponse(token)));
+        sendOk(sessionId, packet.bPktId(), JsonUtil.toBytes(new AuthResponse(token)));
     }
 }

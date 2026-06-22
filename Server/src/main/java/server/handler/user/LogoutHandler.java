@@ -26,11 +26,11 @@ public class LogoutHandler extends BaseHandler {
         LogoutRequest request = JsonUtil.fromBytes(packet.bMsg().payload(), LogoutRequest.class);
 
         if (!authTokenDao.existsByToken(request.token())) {
-            sendError(sessionId, "Unauthorized");
+            sendError(sessionId, packet.bPktId(), "Unauthorized");
             return;
         }
 
         authTokenDao.deleteByToken(request.token());
-        sendOk(sessionId);
+        sendOk(sessionId, packet.bPktId());
     }
 }

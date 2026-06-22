@@ -38,7 +38,7 @@ public class JoinRoomPublicHandler extends BaseHandler {
         int roomId = packet.bMsg().roomId();
 
         if (!roomManager.exists(roomId)) {
-            sendError(sessionId, "Room not found");
+            sendError(sessionId, packet.bPktId(),"Room not found");
             return;
         }
 
@@ -46,7 +46,7 @@ public class JoinRoomPublicHandler extends BaseHandler {
         connectionManager.assignRoom(sessionId, roomId);
 
         CanvasStateResponse canvasState = roomManager.getCanvasState(roomId);
-        sendOk(sessionId, JsonUtil.toBytes(canvasState));
+        sendOk(sessionId, packet.bPktId(), JsonUtil.toBytes(canvasState));
 
         dispatcher.sendToRoom(roomId, Packet.builder()
                 .sessionId(sessionId)

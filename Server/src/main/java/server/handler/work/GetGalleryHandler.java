@@ -45,7 +45,7 @@ public class GetGalleryHandler extends BaseHandler {
 
         dispatcher.sendToClient(sessionId, Packet.builder()
                 .sessionId(sessionId)
-                .bPktId(0)
+                .bPktId(packet.bPktId())
                 .bMsg(Message.builder()
                         .cType(CommandType.GALLERY.getCode())
                         .roomId(0)

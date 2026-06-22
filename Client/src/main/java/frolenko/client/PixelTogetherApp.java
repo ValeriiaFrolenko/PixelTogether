@@ -23,6 +23,7 @@ public class PixelTogetherApp extends Application {
         connectionThread.start();
 
         FXMLLoader fxmlLoader = new FXMLLoader(PixelTogetherApp.class.getResource("view/main-view.fxml"));
+        fxmlLoader.setControllerFactory(injector::getInstance);
         Scene scene = new Scene(fxmlLoader.load(), 800, 600);
         stage.setTitle("PixelTogether");
         stage.setScene(scene);

@@ -44,7 +44,7 @@ public class CreateRoomHandler extends BaseHandler {
 
         var userIdOpt = authTokenDao.findUserIdByToken(request.token());
         if (userIdOpt.isEmpty()) {
-            sendError(sessionId, "Unauthorized");
+            sendError(sessionId, packet.bPktId(),"Unauthorized");
             return;
         }
 
@@ -64,9 +64,9 @@ public class CreateRoomHandler extends BaseHandler {
                 .expiresAt(LocalDateTime.now().plusMinutes(request.durationMinutes()))
                 .build());
 
-        String nickname = participantManager.assign(sessionId);
+        participantManager.assign(sessionId);
         connectionManager.assignRoom(sessionId, (int) roomId);
 
-        sendOk(sessionId, JsonUtil.toBytes(new CreateRoomResponse(roomId, code)));
+        sendOk(sessionId, packet.bPktId(), JsonUtil.toBytes(new CreateRoomResponse(roomId, code)));
     }
 }

@@ -35,14 +35,14 @@ public class GetWorkHandler extends BaseHandler {
 
         Optional<SavedWork> workOpt = savedWorkDao.findById(request.workId());
         if (workOpt.isEmpty()) {
-            sendError(sessionId, "Work not found");
+            sendError(sessionId, packet.bPktId(), "Work not found");
             return;
         }
 
         SavedWork work = workOpt.get();
 
         if (!work.isPublic()) {
-            sendError(sessionId, "Forbidden");
+            sendError(sessionId, packet.bPktId(), "Forbidden");
             return;
         }
 
@@ -50,7 +50,7 @@ public class GetWorkHandler extends BaseHandler {
 
         dispatcher.sendToClient(sessionId, Packet.builder()
                 .sessionId(sessionId)
-                .bPktId(0)
+                .bPktId(packet.bPktId())
                 .bMsg(Message.builder()
                         .cType(CommandType.WORK.getCode())
                         .roomId(0)

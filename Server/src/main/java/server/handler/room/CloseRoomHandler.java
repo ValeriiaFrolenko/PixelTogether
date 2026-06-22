@@ -38,12 +38,12 @@ public class CloseRoomHandler extends BaseHandler {
 
         var userIdOpt = authTokenDao.findUserIdByToken(request.token());
         if (userIdOpt.isEmpty()) {
-            sendError(sessionId, "Unauthorized");
+            sendError(sessionId, packet.bPktId(), "Unauthorized");
             return;
         }
 
         if (!roomManager.exists(roomId)) {
-            sendError(sessionId, "Room not found");
+            sendError(sessionId, packet.bPktId(),"Room not found");
             return;
         }
 
@@ -53,12 +53,12 @@ public class CloseRoomHandler extends BaseHandler {
         if (room.ownerId() != userId) {
             User user = userDao.findById(userId).orElse(null);
             if (user == null || !"ADMIN".equals(user.role())) {
-                sendError(sessionId, "Forbidden");
+                sendError(sessionId, packet.bPktId(), "Forbidden");
                 return;
             }
         }
 
         roomManager.deleteRoom(roomId);
-        sendOk(sessionId);
+        sendOk(sessionId, packet.bPktId());
     }
 }

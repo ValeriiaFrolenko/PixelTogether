@@ -43,7 +43,7 @@ public class JoinRoomPrivateHandler extends BaseHandler {
 
         Optional<Room> roomOpt = roomManager.findByCode(request.code());
         if (roomOpt.isEmpty()) {
-            sendError(sessionId, "Unauthorized");
+            sendError(sessionId, packet.bPktId(),"Unauthorized");
             return;
         }
 
@@ -52,7 +52,7 @@ public class JoinRoomPrivateHandler extends BaseHandler {
         connectionManager.assignRoom(sessionId, room.id());
 
         CanvasStateResponse canvasState = roomManager.getCanvasState(room.id());
-        sendOk(sessionId, JsonUtil.toBytes(canvasState));
+        sendOk(sessionId, packet.bPktId(), JsonUtil.toBytes(canvasState));
 
         dispatcher.sendToRoom(room.id(), Packet.builder()
                 .sessionId(sessionId)

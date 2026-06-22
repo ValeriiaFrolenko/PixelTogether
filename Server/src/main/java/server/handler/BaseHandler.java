@@ -15,10 +15,10 @@ public abstract class BaseHandler implements CommandHandler {
         this.dispatcher = dispatcher;
     }
 
-    protected void sendError(long sessionId, String message) {
+    protected void sendError(long sessionId, long bPktId, String message) {
         dispatcher.sendToClient(sessionId, Packet.builder()
                 .sessionId(sessionId)
-                .bPktId(0)
+                .bPktId(bPktId)
                 .bMsg(Message.builder()
                         .cType(CommandType.ERROR.getCode())
                         .roomId(0)
@@ -27,10 +27,10 @@ public abstract class BaseHandler implements CommandHandler {
                 .build());
     }
 
-    protected void sendOk(long sessionId) {
+    protected void sendOk(long sessionId, long bPktId) {
         dispatcher.sendToClient(sessionId, Packet.builder()
                 .sessionId(sessionId)
-                .bPktId(0)
+                .bPktId(bPktId)
                 .bMsg(Message.builder()
                         .cType(CommandType.OK.getCode())
                         .roomId(0)
@@ -39,10 +39,10 @@ public abstract class BaseHandler implements CommandHandler {
                 .build());
     }
 
-    protected void sendOk(long sessionId, byte[] payload) {
+    protected void sendOk(long sessionId, long bPktId, byte[] payload) {
         dispatcher.sendToClient(sessionId, Packet.builder()
                 .sessionId(sessionId)
-                .bPktId(0)
+                .bPktId(bPktId)
                 .bMsg(Message.builder()
                         .cType(CommandType.OK.getCode())
                         .roomId(0)

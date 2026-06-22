@@ -43,12 +43,12 @@ public class SaveWorkHandler extends BaseHandler {
 
         var userIdOpt = authTokenDao.findUserIdByToken(request.token());
         if (userIdOpt.isEmpty()) {
-            sendError(sessionId, "Unauthorized");
+            sendError(sessionId, packet.bPktId(), "Unauthorized");
             return;
         }
 
         if (!roomManager.exists(roomId)) {
-            sendError(sessionId, "Room not found");
+            sendError(sessionId, packet.bPktId(), "Room not found");
             return;
         }
 
@@ -64,7 +64,7 @@ public class SaveWorkHandler extends BaseHandler {
                 .canvasH(canvasState.height())
                 .build());
 
-        sendOk(sessionId);
+        sendOk(sessionId, packet.bPktId());
     }
 
     private byte[] pixelsToBytes(int[] pixels) {

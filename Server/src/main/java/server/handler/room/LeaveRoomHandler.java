@@ -36,7 +36,7 @@ public class LeaveRoomHandler extends BaseHandler {
         connectionManager.leaveRoom(sessionId, roomId);
         participantManager.remove(sessionId);
 
-        sendOk(sessionId);
+        sendOk(sessionId, packet.bPktId());
 
         dispatcher.sendToRoom(roomId, Packet.builder()
                 .sessionId(sessionId)

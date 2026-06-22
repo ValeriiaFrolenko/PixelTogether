@@ -36,7 +36,7 @@ public class LoginHandler extends BaseHandler {
 
         var userOpt = userDao.findByUsername(request.username());
         if (userOpt.isEmpty()) {
-            sendError(sessionId, "Unauthorized");
+            sendError(sessionId, packet.bPktId(), "Unauthorized");
             return;
         }
 
@@ -47,13 +47,13 @@ public class LoginHandler extends BaseHandler {
         );
 
         if (!result.verified) {
-            sendError(sessionId, "Unauthorized");
+            sendError(sessionId, packet.bPktId(), "Unauthorized");
             return;
         }
 
         String token = UUID.randomUUID().toString();
         authTokenDao.save(token, user.id());
 
-        sendOk(sessionId, JsonUtil.toBytes(new AuthResponse(token)));
+        sendOk(sessionId, packet.bPktId(), JsonUtil.toBytes(new AuthResponse(token)));
     }
 }

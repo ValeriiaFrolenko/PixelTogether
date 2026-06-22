@@ -33,7 +33,7 @@ public class DrawHandler extends BaseHandler {
         DrawRequest request = JsonUtil.fromBytes(packet.bMsg().payload(), DrawRequest.class);
 
         if (!roomManager.exists(roomId)) {
-            sendError(sessionId, "Room not found");
+            sendError(sessionId, packet.bPktId(), "Room not found");
             return;
         }
 
@@ -43,7 +43,10 @@ public class DrawHandler extends BaseHandler {
                         && p.y() >= 0 && p.y() < room.canvasH())
                 .toList();
 
-        if (valid.isEmpty()) return;
+        if (valid.isEmpty()) {
+            sendError(sessionId, packet.bPktId(), "No valid pixels to draw");
+            return;
+        }
 
         roomManager.applyPixels(roomId, valid);
 
