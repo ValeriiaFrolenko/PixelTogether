@@ -1,8 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml">
-    <Label text="PixelTogether"/>
-</VBox>
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="frolenko.client.controller.MainController">
+
+    <TabPane tabClosingPolicy="UNAVAILABLE">
+        <Tab text="Rooms">
+            <fx:include source="tab/rooms-tab.fxml"/>
+        </Tab>
+        <Tab text="Gallery">
+            <fx:include source="tab/gallery-tab.fxml"/>
+        </Tab>
+        <Tab text="Account">
+            <fx:include source="tab/account-tab.fxml"/>
+        </Tab>
+    </TabPane>
+
+</StackPane>

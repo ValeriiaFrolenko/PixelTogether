@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="10" style="-fx-padding: 15;" alignment="TOP_CENTER"
+      xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="frolenko.client.controller.tab.AccountTabController">
+
+    <VBox fx:id="guestPane" spacing="10" maxWidth="300">
+        <TextField fx:id="usernameField" promptText="Username"/>
+        <PasswordField fx:id="passwordField" promptText="Password"/>
+        <HBox spacing="10">
+            <Button text="Login" onAction="#onLogin" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+            <Button text="Register" onAction="#onRegister" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+        </HBox>
+        <Label fx:id="authErrorLabel" style="-fx-text-fill: red;"/>
+    </VBox>
+
+    <VBox fx:id="loggedInPane" spacing="10" maxWidth="300" visible="false" managed="false">
+        <Label fx:id="usernameLabel"/>
+        <Button text="Logout" onAction="#onLogout" maxWidth="Infinity"/>
+    </VBox>
+
+</VBox>

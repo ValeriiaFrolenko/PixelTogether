@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="10" style="-fx-padding: 15;"
+      xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="frolenko.client.controller.tab.GalleryTabController">
+
+    <HBox spacing="10">
+        <TextField fx:id="titleFilter" promptText="Filter by title" HBox.hgrow="ALWAYS"
+                   onKeyReleased="#onFilterChanged"/>
+        <TextField fx:id="authorFilter" promptText="Filter by author" HBox.hgrow="ALWAYS"
+                   onKeyReleased="#onFilterChanged"/>
+    </HBox>
+
+    <ListView fx:id="galleryListView" VBox.vgrow="ALWAYS"/>
+
+    <Button text="View" onAction="#onViewWork" maxWidth="Infinity"/>
+
+</VBox>

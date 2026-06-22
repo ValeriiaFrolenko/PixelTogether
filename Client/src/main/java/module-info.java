@@ -8,12 +8,21 @@ module frolenko.client {
     requires com.google.guice.extensions.assistedinject;
 
     opens frolenko.client to javafx.fxml, com.google.guice;
-    opens frolenko.client.controler to javafx.fxml, com.google.guice;
+    opens frolenko.client.controller to javafx.fxml, com.google.guice;
     opens frolenko.client.core to com.google.guice;
     opens frolenko.client.network to com.google.guice;
+    opens frolenko.client.controller.tab to com.google.guice, javafx.fxml;
+    opens frolenko.client.controller.dialog to com.google.guice, javafx.fxml;
+    opens frolenko.client.handler to com.google.guice, javafx.fxml;
+    opens frolenko.client.service to com.google.guice, javafx.fxml;
 
     exports frolenko.client;
-    exports frolenko.client.controler;
+    exports frolenko.client.controller;
     exports frolenko.client.core;
     exports frolenko.client.network;
+    exports frolenko.client.controller.tab;
+    exports frolenko.client.controller.dialog;
+    exports frolenko.client.handler;
+    exports frolenko.client.service;
+
 }

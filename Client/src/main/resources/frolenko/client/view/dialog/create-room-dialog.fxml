@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="12" style="-fx-padding: 20;" minWidth="300"
+      xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="frolenko.client.controller.dialog.CreateRoomDialogController">
+
+    <Label text="Create Room" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
+
+    <Label text="Room name"/>
+    <TextField fx:id="nameField" promptText="Room name"/>
+
+    <Label text="Canvas width"/>
+    <TextField fx:id="canvasWField" promptText="e.g. 64" text="64"/>
+
+    <Label text="Canvas height"/>
+    <TextField fx:id="canvasHField" promptText="e.g. 64" text="64"/>
+
+    <Label text="Duration (minutes)"/>
+    <TextField fx:id="durationField" promptText="e.g. 60" text="60"/>
+
+    <CheckBox fx:id="privateCheckBox" text="Private room"/>
+
+    <Label fx:id="errorLabel" style="-fx-text-fill: red;"/>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Cancel" onAction="#onCancel"/>
+        <Button text="Create" onAction="#onCreate" defaultButton="true"/>
+    </HBox>
+
+</VBox>
