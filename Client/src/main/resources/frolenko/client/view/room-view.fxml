@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="frolenko.client.controller.RoomController"
+            style="-fx-background-color: #fff5f7;">
+
+    <top>
+        <HBox spacing="10" alignment="CENTER_LEFT"
+              style="-fx-padding: 10 15; -fx-background-color: #fce4ec; -fx-border-color: #f8bbd0; -fx-border-width: 0 0 1 0;">
+
+            <ColorPicker fx:id="colorPicker" style="-fx-background-color: #ffffff; -fx-border-color: #f8bbd0; -fx-border-radius: 4; -fx-background-radius: 4;"/>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <Label text="Participants:" style="-fx-text-fill: #880e4f; -fx-font-weight: bold;"/>
+            <ListView fx:id="nicknameListView" prefWidth="150" prefHeight="36" maxHeight="36"
+                      style="-fx-background-radius: 4; -fx-border-color: #f8bbd0; -fx-border-radius: 4; -fx-background-color: #ffffff;"/>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <Button fx:id="saveButton" text="Save" onAction="#onSave" visible="false" managed="false"
+                    style="-fx-background-color: #fce4ec; -fx-border-color: #f06292; -fx-border-radius: 4; -fx-background-radius: 4; -fx-text-fill: #880e4f; -fx-font-weight: bold; -fx-padding: 5 12;"/>
+            <Button fx:id="closeRoomButton" text="Close Room" onAction="#onCloseRoom" visible="false" managed="false"
+                    style="-fx-background-color: #fce4ec; -fx-border-color: #f06292; -fx-border-radius: 4; -fx-background-radius: 4; -fx-text-fill: #880e4f; -fx-font-weight: bold; -fx-padding: 5 12;"/>
+            <Button text="Leave" onAction="#onLeave"
+                    style="-fx-background-color: #f06292; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 4; -fx-padding: 5 12;"/>
+        </HBox>
+    </top>
+
+    <center>
+        <Pane fx:id="canvasContainer" style="-fx-background-color: #e0e0e0;"/>
+    </center>
+
+</BorderPane>

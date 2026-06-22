@@ -57,12 +57,19 @@ public class JoinRoomPrivateHandler extends BaseHandler {
         }
 
         Room room = roomOpt.get();
+
+        boolean isOwner = authTokenDao.findUserIdByToken(request.token())
+                .map(uid -> uid == room.ownerId())
+                .orElse(false);
+
         String nickname = NicknameResolver.resolve(request.token(), authTokenDao, userDao);
         participantManager.assign(sessionId, nickname);
         connectionManager.assignRoom(sessionId, room.id());
 
         CanvasStateResponse canvasState = roomManager.getCanvasState(room.id());
-        sendOk(sessionId, packet.bPktId(), JsonUtil.toBytes(canvasState));
+        sendOk(sessionId, packet.bPktId(), JsonUtil.toBytes(
+                new CanvasStateResponse(canvasState.width(), canvasState.height(), canvasState.pixels(), isOwner)
+        ));
 
         dispatcher.sendToRoom(room.id(), Packet.builder()
                 .sessionId(sessionId)

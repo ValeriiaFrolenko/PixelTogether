@@ -128,7 +128,7 @@ public class RoomManager {
         int[] pixels = new int[w * h];
         for (int i = 0; i < w * h; i++)
             pixels[i] = active.canvas().get(i);
-        return new CanvasStateResponse(w, h, pixels);
+        return new CanvasStateResponse(w, h, pixels, false);
     }
 
     public Optional<Room> findByCode(String code) {

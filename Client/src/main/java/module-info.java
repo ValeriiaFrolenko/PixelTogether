@@ -25,5 +25,7 @@ module frolenko.client {
     exports frolenko.client.controller.dialog;
     exports frolenko.client.handler;
     exports frolenko.client.service;
+    exports frolenko.client.ui;
+    opens frolenko.client.ui to com.google.guice, javafx.fxml;
 
 }

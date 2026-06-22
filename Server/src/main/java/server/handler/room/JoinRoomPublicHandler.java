@@ -11,6 +11,7 @@ import server.core.ParticipantManager;
 import server.core.RoomManager;
 import server.database.dao.AuthTokenDao;
 import server.database.dao.UserDao;
+import server.database.model.Room;
 import server.handler.BaseHandler;
 import server.network.ConnectionManager;
 import server.network.ResponseDispatcher;
@@ -53,12 +54,20 @@ public class JoinRoomPublicHandler extends BaseHandler {
             return;
         }
 
+        Room room = roomManager.getRoom(roomId);
+
+        boolean isOwner = authTokenDao.findUserIdByToken(request.token())
+                .map(uid -> uid == room.ownerId())
+                .orElse(false);
+
         String nickname = NicknameResolver.resolve(request.token(), authTokenDao, userDao);
         participantManager.assign(sessionId, nickname);
         connectionManager.assignRoom(sessionId, roomId);
 
         CanvasStateResponse canvasState = roomManager.getCanvasState(roomId);
-        sendOk(sessionId, packet.bPktId(), JsonUtil.toBytes(canvasState));
+        sendOk(sessionId, packet.bPktId(), JsonUtil.toBytes(
+                new CanvasStateResponse(canvasState.width(), canvasState.height(), canvasState.pixels(), isOwner)
+        ));
 
         dispatcher.sendToRoom(roomId, Packet.builder()
                 .sessionId(sessionId)

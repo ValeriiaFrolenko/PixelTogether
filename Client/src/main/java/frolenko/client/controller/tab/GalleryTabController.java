@@ -73,7 +73,7 @@ public class GalleryTabController {
         }
         galleryService.getWork(selected.id(),
                 work -> Platform.runLater(() -> {
-                    appState.setCurrentRoom(new RoomState(-1, work.canvasW(), work.canvasH(), work.pixels()));
+                    appState.setCurrentRoom(new RoomState(-1, work.canvasW(), work.canvasH(), work.pixels(), false));
                     viewManager.navigateTo(AppView.ROOM);
                 }),
                 error -> Platform.runLater(() -> AlertHelper.showError(error))
