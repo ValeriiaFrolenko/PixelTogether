@@ -8,7 +8,9 @@ import common.utils.JsonUtil;
 import server.core.ParticipantManager;
 import server.core.RoomManager;
 import server.database.dao.AuthTokenDao;
+import server.database.dao.UserDao;
 import server.database.model.Room;
+import server.database.model.User;
 import server.handler.BaseHandler;
 import server.network.ConnectionManager;
 import server.network.ResponseDispatcher;
@@ -22,18 +24,21 @@ public class CreateRoomHandler extends BaseHandler {
     private final RoomManager roomManager;
     private final ParticipantManager participantManager;
     private final AuthTokenDao authTokenDao;
+    private final UserDao userDao;
     private final ConnectionManager connectionManager;
 
     @Inject
     public CreateRoomHandler(RoomManager roomManager,
                              ParticipantManager participantManager,
                              AuthTokenDao authTokenDao,
+                             UserDao userDao,
                              ConnectionManager connectionManager,
                              ResponseDispatcher dispatcher) {
         super(dispatcher);
         this.roomManager = roomManager;
         this.participantManager = participantManager;
         this.authTokenDao = authTokenDao;
+        this.userDao = userDao;
         this.connectionManager = connectionManager;
     }
 
@@ -44,11 +49,15 @@ public class CreateRoomHandler extends BaseHandler {
 
         var userIdOpt = authTokenDao.findUserIdByToken(request.token());
         if (userIdOpt.isEmpty()) {
-            sendError(sessionId, packet.bPktId(),"Unauthorized");
+            sendError(sessionId, packet.bPktId(), "Unauthorized");
             return;
         }
 
         int userId = userIdOpt.get();
+
+        String username = userDao.findById(userId)
+                .map(User::username)
+                .orElse("Unknown");
 
         String code = request.isPrivate()
                 ? UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase()
@@ -64,7 +73,7 @@ public class CreateRoomHandler extends BaseHandler {
                 .expiresAt(LocalDateTime.now().plusMinutes(request.durationMinutes()))
                 .build());
 
-        participantManager.assign(sessionId);
+        participantManager.assign(sessionId, username);
         connectionManager.assignRoom(sessionId, (int) roomId);
 
         sendOk(sessionId, packet.bPktId(), JsonUtil.toBytes(new CreateRoomResponse(roomId, code)));

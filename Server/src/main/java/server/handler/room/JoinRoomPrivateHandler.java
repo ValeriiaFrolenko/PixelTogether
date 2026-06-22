@@ -6,8 +6,11 @@ import common.dto.room.CanvasStateResponse;
 import common.dto.room.JoinRoomPrivateRequest;
 import common.dto.room.ParticipantEvent;
 import common.utils.JsonUtil;
+import server.core.NicknameResolver;
 import server.core.ParticipantManager;
 import server.core.RoomManager;
+import server.database.dao.AuthTokenDao;
+import server.database.dao.UserDao;
 import server.database.model.Room;
 import server.handler.BaseHandler;
 import server.network.ConnectionManager;
@@ -24,16 +27,22 @@ public class JoinRoomPrivateHandler extends BaseHandler {
     private final RoomManager roomManager;
     private final ParticipantManager participantManager;
     private final ConnectionManager connectionManager;
+    private final AuthTokenDao authTokenDao;
+    private final UserDao userDao;
 
     @Inject
     public JoinRoomPrivateHandler(RoomManager roomManager,
                                   ParticipantManager participantManager,
                                   ConnectionManager connectionManager,
+                                  AuthTokenDao authTokenDao,
+                                  UserDao userDao,
                                   ResponseDispatcher dispatcher) {
         super(dispatcher);
         this.roomManager = roomManager;
         this.participantManager = participantManager;
         this.connectionManager = connectionManager;
+        this.authTokenDao = authTokenDao;
+        this.userDao = userDao;
     }
 
     @Override
@@ -43,12 +52,13 @@ public class JoinRoomPrivateHandler extends BaseHandler {
 
         Optional<Room> roomOpt = roomManager.findByCode(request.code());
         if (roomOpt.isEmpty()) {
-            sendError(sessionId, packet.bPktId(),"Unauthorized");
+            sendError(sessionId, packet.bPktId(), "Unauthorized");
             return;
         }
 
         Room room = roomOpt.get();
-        String nickname = participantManager.assign(sessionId);
+        String nickname = NicknameResolver.resolve(request.token(), authTokenDao, userDao);
+        participantManager.assign(sessionId, nickname);
         connectionManager.assignRoom(sessionId, room.id());
 
         CanvasStateResponse canvasState = roomManager.getCanvasState(room.id());

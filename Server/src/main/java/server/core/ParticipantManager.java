@@ -9,10 +9,8 @@ public class ParticipantManager {
 
     private final ConcurrentHashMap<Long, String> nicknames = new ConcurrentHashMap<>();
 
-    public String assign(long sessionId) {
-        String nickname = NicknameGenerator.generate();
+    public void assign(long sessionId, String nickname) {
         nicknames.put(sessionId, nickname);
-        return nickname;
     }
 
     public String get(long sessionId) {

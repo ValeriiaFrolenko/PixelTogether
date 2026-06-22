@@ -66,12 +66,14 @@ public class ServerApi {
     }
 
     public void joinPublic(int roomId, Consumer<Packet> callback) {
-        send(CommandType.JOIN_ROOM_PUBLIC, roomId, new byte[0], callback);
+        send(CommandType.JOIN_ROOM_PUBLIC, roomId,
+                JsonUtil.toBytes(new JoinRoomPublicRequest(appState.getToken())),
+                callback);
     }
 
     public void joinPrivate(String code, Consumer<Packet> callback) {
         send(CommandType.JOIN_ROOM_PRIVATE, 0,
-                JsonUtil.toBytes(new JoinRoomPrivateRequest(code)),
+                JsonUtil.toBytes(new JoinRoomPrivateRequest(code, appState.getToken())),
                 callback);
     }
 
