@@ -67,7 +67,7 @@ public class RoomService {
         serverApi.joinPrivate(code, packet -> {
             if (packet.bMsg().cType() == CommandType.OK.getCode()) {
                 CanvasStateResponse canvas = JsonUtil.fromBytes(packet.bMsg().payload(), CanvasStateResponse.class);
-                RoomState room = new RoomState(0, canvas.width(), canvas.height(), canvas.pixels(), canvas.isOwner());
+                RoomState room = new RoomState(canvas.roomId(), canvas.width(), canvas.height(), canvas.pixels(), canvas.isOwner());
                 appState.setCurrentRoom(room);
                 onSuccess.accept(room);
             } else {

@@ -66,7 +66,7 @@ public class JoinRoomPublicHandler extends BaseHandler {
 
         CanvasStateResponse canvasState = roomManager.getCanvasState(roomId);
         sendOk(sessionId, packet.bPktId(), JsonUtil.toBytes(
-                new CanvasStateResponse(canvasState.width(), canvasState.height(), canvasState.pixels(), isOwner)
+                new CanvasStateResponse(canvasState.roomId(), canvasState.width(), canvasState.height(), canvasState.pixels(), isOwner)
         ));
 
         dispatcher.sendToRoom(roomId, Packet.builder()
