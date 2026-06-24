@@ -21,10 +21,7 @@ import common.protocol.Decryptor;
 import common.protocol.DecryptorService;
 import common.protocol.Encryptor;
 import common.protocol.EncryptorService;
-import server.handler.work.DeleteWorkHandler;
-import server.handler.work.GetGalleryHandler;
-import server.handler.work.GetWorkHandler;
-import server.handler.work.SaveWorkHandler;
+import server.handler.work.*;
 import server.network.Sender;
 import server.network.ServerKeyStore;
 import server.network.ServerReceiver;
@@ -66,6 +63,7 @@ public class ServerModule extends AbstractModule {
         handlerBinder.addBinding(CommandType.LEAVE_ROOM).to(LeaveRoomHandler.class);
         handlerBinder.addBinding(CommandType.CLOSE_ROOM).to(CloseRoomHandler.class);
         handlerBinder.addBinding(CommandType.GET_ROOMS).to(GetRoomsHandler.class);
+        handlerBinder.addBinding(CommandType.GET_MY_ROOMS).to(GetMyRoomsHandler.class);
 
         // draw
         handlerBinder.addBinding(CommandType.DRAW).to(DrawHandler.class);
@@ -75,6 +73,7 @@ public class ServerModule extends AbstractModule {
         handlerBinder.addBinding(CommandType.GET_GALLERY).to(GetGalleryHandler.class);
         handlerBinder.addBinding(CommandType.GET_WORK).to(GetWorkHandler.class);
         handlerBinder.addBinding(CommandType.DELETE_WORK).to(DeleteWorkHandler.class);
+        handlerBinder.addBinding(CommandType.GET_MY_WORKS).to(GetMyWorksHandler.class);
     }
 
     @Provides @Singleton @Named("receiverPool")

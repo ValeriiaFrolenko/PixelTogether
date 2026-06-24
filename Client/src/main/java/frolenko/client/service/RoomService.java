@@ -5,6 +5,7 @@ import com.google.inject.Singleton;
 import common.dto.ErrorResponse;
 import common.dto.room.CanvasStateResponse;
 import common.dto.room.CreateRoomResponse;
+import common.dto.room.MyRoomInfo;
 import common.dto.room.RoomInfo;
 import common.protocol.CommandType;
 import common.utils.JsonUtil;
@@ -31,6 +32,17 @@ public class RoomService {
         serverApi.getRooms(packet -> {
             if (packet.bMsg().cType() == CommandType.ROOM_LIST.getCode()) {
                 List<RoomInfo> rooms = List.of(JsonUtil.fromBytes(packet.bMsg().payload(), RoomInfo[].class));
+                onSuccess.accept(rooms);
+            } else {
+                onError.accept(extractError(packet));
+            }
+        });
+    }
+
+    public void getMyRooms(String token, Consumer<List<MyRoomInfo>> onSuccess, Consumer<String> onError) {
+        serverApi.getMyRooms(token, packet -> {
+            if (packet.bMsg().cType() == CommandType.MY_ROOMS.getCode()) {
+                List<MyRoomInfo> rooms = List.of(JsonUtil.fromBytes(packet.bMsg().payload(), MyRoomInfo[].class));
                 onSuccess.accept(rooms);
             } else {
                 onError.accept(extractError(packet));

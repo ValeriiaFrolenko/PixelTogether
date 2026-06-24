@@ -44,7 +44,7 @@ public class ViewManager {
         rootArea.getChildren().setAll(root);
     }
 
-    public <T> T showDialog(AppView view, Consumer<T> controllerConsumer) {
+    public <T> void showDialog(AppView view, Consumer<T> controllerConsumer) {
         try {
             FXMLLoader loader = new FXMLLoader(
                     PixelTogetherApp.class.getResource(view.getFxmlPath())
@@ -65,7 +65,6 @@ public class ViewManager {
             }
 
             dialogStage.showAndWait();
-            return controller;
         } catch (IOException e) {
             throw new RuntimeException("Failed to load dialog: " + view.getFxmlPath(), e);
         }
@@ -77,6 +76,10 @@ public class ViewManager {
 
     public void clearCache() {
         cache.clear();
+    }
+
+    public void clearView(AppView view) {
+        cache.remove(view);
     }
 
     private Parent loadView(AppView view) {

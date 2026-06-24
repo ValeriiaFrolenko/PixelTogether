@@ -108,7 +108,7 @@ public class RoomController {
         roomService.leaveRoom(room.getRoomId(),
                 () -> Platform.runLater(() -> {
                     if (canvasPane != null) canvasPane.shutdown();
-                    viewManager.clearCache();
+                    viewManager.clearView(AppView.ROOM);
                     viewManager.navigateTo(AppView.MAIN);
                 }),
                 error -> Platform.runLater(() -> AlertHelper.showError(error))
@@ -123,7 +123,7 @@ public class RoomController {
         roomService.closeRoom(room.getRoomId(), appState.getToken(),
                 () -> Platform.runLater(() -> {
                     if (canvasPane != null) canvasPane.shutdown();
-                    viewManager.clearCache();
+                    viewManager.clearView(AppView.ROOM);
                     viewManager.navigateTo(AppView.MAIN);
                 }),
                 error -> Platform.runLater(() -> AlertHelper.showError(error))

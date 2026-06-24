@@ -60,7 +60,7 @@ public class WorkController {
     @FXML
     public void onBack() {
         appState.setCurrentRoom(null);
-        viewManager.clearCache();
+        viewManager.clearView(AppView.WORK_VIEW);
         viewManager.navigateTo(AppView.MAIN);
     }
 }

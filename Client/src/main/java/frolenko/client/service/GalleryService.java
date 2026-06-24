@@ -34,6 +34,17 @@ public class GalleryService {
         });
     }
 
+    public void getMyWorks(String token, Consumer<List<GalleryItem>> onSuccess, Consumer<String> onError) {
+        serverApi.getMyWorks(token, packet -> {
+            if (packet.bMsg().cType() == CommandType.MY_WORKS.getCode()) {
+                List<GalleryItem> items = List.of(JsonUtil.fromBytes(packet.bMsg().payload(), GalleryItem[].class));
+                onSuccess.accept(items);
+            } else {
+                onError.accept(extractError(packet));
+            }
+        });
+    }
+
     public void getWork(int workId, Consumer<GetWorkResponse> onSuccess, Consumer<String> onError) {
         serverApi.getWork(workId, packet -> {
             if (packet.bMsg().cType() == CommandType.WORK.getCode()) {

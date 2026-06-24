@@ -137,4 +137,11 @@ public class RoomManager {
                 .filter(room -> code.equals(room.code()))
                 .findFirst();
     }
+
+    public List<Room> getRoomsByOwner(int ownerId) {
+        return rooms.values().stream()
+                .map(ActiveRoom::room)
+                .filter(room -> room.ownerId() == ownerId)
+                .toList();
+    }
 }

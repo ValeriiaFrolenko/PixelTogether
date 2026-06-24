@@ -14,6 +14,7 @@ public enum CommandType {
     LEAVE_ROOM(13),
     CLOSE_ROOM(14),
     GET_ROOMS(15),
+    GET_MY_ROOMS(16),
 
     // --- DRAW ---
     DRAW(20),
@@ -23,6 +24,7 @@ public enum CommandType {
     GET_GALLERY(31),
     GET_WORK(32),
     DELETE_WORK(33),
+    GET_MY_WORKS(34),
 
     // --- SERVER RESPONSES ---
     OK(100),
@@ -33,7 +35,9 @@ public enum CommandType {
     WORK(105),
     ROOM_UPDATE(106),
     PARTICIPANT_JOINED(107),
-    PARTICIPANT_LEFT(108);
+    PARTICIPANT_LEFT(108),
+    MY_WORKS(109),
+    MY_ROOMS(110);
 
     private final int code;
 

@@ -32,30 +32,24 @@ public class ServerApi {
         this.appState = appState;
     }
 
-    // --- AUTH ---
-
     public void register(String username, String password, Consumer<Packet> callback) {
-        send(CommandType.REGISTER, 0,
-                JsonUtil.toBytes(new RegisterRequest(username, password)),
-                callback);
+        send(CommandType.REGISTER, 0, JsonUtil.toBytes(new RegisterRequest(username, password)), callback);
     }
 
     public void login(String username, String password, Consumer<Packet> callback) {
-        send(CommandType.LOGIN, 0,
-                JsonUtil.toBytes(new LoginRequest(username, password)),
-                callback);
+        send(CommandType.LOGIN, 0, JsonUtil.toBytes(new LoginRequest(username, password)), callback);
     }
 
     public void logout(String token, Consumer<Packet> callback) {
-        send(CommandType.LOGOUT, 0,
-                JsonUtil.toBytes(new LogoutRequest(token)),
-                callback);
+        send(CommandType.LOGOUT, 0, JsonUtil.toBytes(new LogoutRequest(token)), callback);
     }
-
-    // --- ROOM ---
 
     public void getRooms(Consumer<Packet> callback) {
         send(CommandType.GET_ROOMS, 0, new byte[0], callback);
+    }
+
+    public void getMyRooms(String token, Consumer<Packet> callback) {
+        send(CommandType.GET_MY_ROOMS, 0, JsonUtil.toBytes(new GetMyRoomsRequest(token)), callback);
     }
 
     public void createRoom(String token, String name, int canvasW, int canvasH,
@@ -67,14 +61,12 @@ public class ServerApi {
 
     public void joinPublic(int roomId, Consumer<Packet> callback) {
         send(CommandType.JOIN_ROOM_PUBLIC, roomId,
-                JsonUtil.toBytes(new JoinRoomPublicRequest(appState.getToken())),
-                callback);
+                JsonUtil.toBytes(new JoinRoomPublicRequest(appState.getToken())), callback);
     }
 
     public void joinPrivate(String code, Consumer<Packet> callback) {
         send(CommandType.JOIN_ROOM_PRIVATE, 0,
-                JsonUtil.toBytes(new JoinRoomPrivateRequest(code, appState.getToken())),
-                callback);
+                JsonUtil.toBytes(new JoinRoomPrivateRequest(code, appState.getToken())), callback);
     }
 
     public void leaveRoom(int roomId, Consumer<Packet> callback) {
@@ -82,46 +74,32 @@ public class ServerApi {
     }
 
     public void closeRoom(int roomId, String token, Consumer<Packet> callback) {
-        send(CommandType.CLOSE_ROOM, roomId,
-                JsonUtil.toBytes(new CloseRoomRequest(token)),
-                callback);
+        send(CommandType.CLOSE_ROOM, roomId, JsonUtil.toBytes(new CloseRoomRequest(token)), callback);
     }
-
-    // --- DRAW ---
 
     public void draw(int roomId, List<PixelUpdate> pixels, Consumer<Packet> callback) {
-        send(CommandType.DRAW, roomId,
-                JsonUtil.toBytes(new DrawRequest(pixels)),
-                callback);
+        send(CommandType.DRAW, roomId, JsonUtil.toBytes(new DrawRequest(pixels)), callback);
     }
 
-    // --- WORK ---
-
     public void saveWork(int roomId, String token, String title, boolean isPublic, Consumer<Packet> callback) {
-        send(CommandType.SAVE_WORK, roomId,
-                JsonUtil.toBytes(new SaveWorkRequest(token, title, isPublic)),
-                callback);
+        send(CommandType.SAVE_WORK, roomId, JsonUtil.toBytes(new SaveWorkRequest(token, title, isPublic)), callback);
     }
 
     public void getGallery(String title, String ownerUsername, Consumer<Packet> callback) {
-        send(CommandType.GET_GALLERY, 0,
-                JsonUtil.toBytes(new GetGalleryRequest(title, ownerUsername)),
-                callback);
+        send(CommandType.GET_GALLERY, 0, JsonUtil.toBytes(new GetGalleryRequest(title, ownerUsername)), callback);
     }
 
     public void getWork(int workId, Consumer<Packet> callback) {
-        send(CommandType.GET_WORK, 0,
-                JsonUtil.toBytes(new GetWorkRequest(workId)),
-                callback);
+        send(CommandType.GET_WORK, 0, JsonUtil.toBytes(new GetWorkRequest(workId)), callback);
     }
 
     public void deleteWork(String token, int workId, Consumer<Packet> callback) {
-        send(CommandType.DELETE_WORK, 0,
-                JsonUtil.toBytes(new DeleteWorkRequest(token, workId)),
-                callback);
+        send(CommandType.DELETE_WORK, 0, JsonUtil.toBytes(new DeleteWorkRequest(token, workId)), callback);
     }
 
-    // --- INTERNAL ---
+    public void getMyWorks(String token, Consumer<Packet> callback) {
+        send(CommandType.GET_MY_WORKS, 0, JsonUtil.toBytes(new GetMyWorksRequest(token)), callback);
+    }
 
     private void send(CommandType commandType, int roomId, byte[] payload, Consumer<Packet> callback) {
         long pktId = pktIdCounter.getAndIncrement();
