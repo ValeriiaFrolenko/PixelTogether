@@ -12,8 +12,10 @@ import frolenko.client.service.AuthService;
 import frolenko.client.service.GalleryService;
 import frolenko.client.service.RoomService;
 import frolenko.client.util.AlertHelper;
+import frolenko.client.util.UiUtil;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -23,8 +25,13 @@ import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.VBox;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 @Singleton
 public class AccountTabController {
+
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
     private final AuthService authService;
     private final AppState appState;
@@ -40,6 +47,8 @@ public class AccountTabController {
     @FXML private Label usernameLabel;
     @FXML private ListView<GalleryItem> myWorksListView;
     @FXML private ListView<MyRoomInfo> myRoomsListView;
+    @FXML private Button loginButton;
+    @FXML private Button registerButton;
 
     @Inject
     public AccountTabController(AuthService authService,
@@ -63,7 +72,6 @@ public class AccountTabController {
                 if (empty || item == null) {
                     setText(null);
                 } else {
-                    String visibility = item.id() > 0 ? "" : "";
                     setText(item.title() + " (" + item.canvasW() + "x" + item.canvasH() + ") — " +
                             (item.savedAt() != null ? item.savedAt() : ""));
                 }
@@ -79,7 +87,8 @@ public class AccountTabController {
                 } else {
                     String type = item.isPrivate() ? "Private" : "Public";
                     String code = item.code() != null ? " | Code: " + item.code() : "";
-                    setText(item.name() + " [" + type + "]" + code + " | Expires: " + item.expiresAt());
+                    String expires = LocalDateTime.parse(item.expiresAt()).format(FORMATTER);
+                    setText(item.name() + " [" + type + "]" + code + " | Expires: " + expires);
                 }
             }
         });
@@ -131,12 +140,17 @@ public class AccountTabController {
             AlertHelper.showError("Select a work first.");
             return;
         }
+        Runnable unblock = UiUtil.withLoading(myWorksListView);
         galleryService.getWork(selected.id(),
                 work -> Platform.runLater(() -> {
+                    unblock.run();
                     viewManager.navigateTo(AppView.WORK_VIEW);
                     appState.setCurrentRoom(new RoomState(-1, work.canvasW(), work.canvasH(), work.pixels(), false));
                 }),
-                error -> Platform.runLater(() -> AlertHelper.showError(error))
+                error -> Platform.runLater(() -> {
+                    unblock.run();
+                    AlertHelper.showError(error);
+                })
         );
     }
 
@@ -148,9 +162,16 @@ public class AccountTabController {
             return;
         }
         if (!AlertHelper.confirmDelete(selected.title())) return;
+        Runnable unblock = UiUtil.withLoading(myWorksListView);
         galleryService.deleteWork(appState.getToken(), selected.id(),
-                () -> Platform.runLater(this::loadMyWorks),
-                error -> Platform.runLater(() -> AlertHelper.showError(error))
+                () -> Platform.runLater(() -> {
+                    unblock.run();
+                    loadMyWorks();
+                }),
+                error -> Platform.runLater(() -> {
+                    unblock.run();
+                    AlertHelper.showError(error);
+                })
         );
     }
 
@@ -161,15 +182,28 @@ public class AccountTabController {
             AlertHelper.showError("Select a room first.");
             return;
         }
+        Runnable unblock = UiUtil.withLoading(myRoomsListView);
         if (selected.isPrivate()) {
             roomService.joinPrivate(selected.code(),
-                    room -> Platform.runLater(() -> viewManager.navigateTo(AppView.ROOM)),
-                    error -> Platform.runLater(() -> AlertHelper.showError(error))
+                    room -> Platform.runLater(() -> {
+                        unblock.run();
+                        viewManager.navigateTo(AppView.ROOM);
+                    }),
+                    error -> Platform.runLater(() -> {
+                        unblock.run();
+                        AlertHelper.showError(error);
+                    })
             );
         } else {
             roomService.joinPublic(selected.roomId(),
-                    room -> Platform.runLater(() -> viewManager.navigateTo(AppView.ROOM)),
-                    error -> Platform.runLater(() -> AlertHelper.showError(error))
+                    room -> Platform.runLater(() -> {
+                        unblock.run();
+                        viewManager.navigateTo(AppView.ROOM);
+                    }),
+                    error -> Platform.runLater(() -> {
+                        unblock.run();
+                        AlertHelper.showError(error);
+                    })
             );
         }
     }
@@ -199,14 +233,19 @@ public class AccountTabController {
             authErrorLabel.setText("Enter username and password.");
             return;
         }
+        Runnable unblock = UiUtil.withLoading(guestPane);
         authService.login(username, password,
                 token -> Platform.runLater(() -> {
+                    unblock.run();
                     appState.setToken(token);
                     usernameLabel.setText(username);
                     authErrorLabel.setText("");
                     passwordField.clear();
                 }),
-                error -> Platform.runLater(() -> authErrorLabel.setText(error))
+                error -> Platform.runLater(() -> {
+                    unblock.run();
+                    authErrorLabel.setText(error);
+                })
         );
     }
 
@@ -218,25 +257,35 @@ public class AccountTabController {
             authErrorLabel.setText("Enter username and password.");
             return;
         }
+        Runnable unblock = UiUtil.withLoading(guestPane);
         authService.register(username, password,
                 token -> Platform.runLater(() -> {
+                    unblock.run();
                     appState.setToken(token);
                     usernameLabel.setText(username);
                     authErrorLabel.setText("");
                     passwordField.clear();
                 }),
-                error -> Platform.runLater(() -> authErrorLabel.setText(error))
+                error -> Platform.runLater(() -> {
+                    unblock.run();
+                    authErrorLabel.setText(error);
+                })
         );
     }
 
     @FXML
     public void onLogout() {
+        Runnable unblock = UiUtil.withLoading(loggedInPane);
         authService.logout(appState.getToken(),
                 () -> Platform.runLater(() -> {
+                    unblock.run();
                     appState.setToken(null);
                     usernameLabel.setText("");
                 }),
-                error -> Platform.runLater(() -> AlertHelper.showError(error))
+                error -> Platform.runLater(() -> {
+                    unblock.run();
+                    AlertHelper.showError(error);
+                })
         );
     }
 }

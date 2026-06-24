@@ -9,12 +9,12 @@
 
     <HBox spacing="10" alignment="CENTER">
         <TextField fx:id="privateCodeField" promptText="Private room code" prefWidth="250" style="-fx-background-radius: 4; -fx-border-color: #f8bbd0; -fx-border-radius: 4; -fx-background-color: #ffffff;"/>
-        <Button text="Join Private" onAction="#onJoinPrivate" style="-fx-background-color: #fce4ec; -fx-border-color: #f06292; -fx-border-radius: 4; -fx-background-radius: 4; -fx-text-fill: #880e4f; -fx-font-weight: bold; -fx-padding: 5 12;"/>
+        <Button fx:id="joinPrivateButton" text="Join Private" onAction="#onJoinPrivate" style="-fx-background-color: #fce4ec; -fx-border-color: #f06292; -fx-border-radius: 4; -fx-background-radius: 4; -fx-text-fill: #880e4f; -fx-font-weight: bold; -fx-padding: 5 12;"/>
     </HBox>
 
     <HBox spacing="15" alignment="CENTER">
         <Button fx:id="createRoomButton" text="Create Room" onAction="#onCreateRoom" visible="false" managed="false" style="-fx-background-color: #fce4ec; -fx-border-color: #f06292; -fx-border-radius: 4; -fx-background-radius: 4; -fx-text-fill: #880e4f; -fx-font-weight: bold; -fx-padding: 5 12;"/>
-        <Button text="Refresh" onAction="#onRefreshRooms" style="-fx-background-color: #ffffff; -fx-border-color: #f8bbd0; -fx-border-radius: 4; -fx-background-radius: 4; -fx-text-fill: #880e4f; -fx-padding: 5 12;"/>
+        <Button fx:id="refreshButton" text="Refresh" onAction="#onRefreshRooms" style="-fx-background-color: #ffffff; -fx-border-color: #f8bbd0; -fx-border-radius: 4; -fx-background-radius: 4; -fx-text-fill: #880e4f; -fx-padding: 5 12;"/>
     </HBox>
 
     <ListView fx:id="roomListView" VBox.vgrow="ALWAYS" maxWidth="600" style="-fx-background-radius: 4; -fx-border-color: #f8bbd0; -fx-border-radius: 4; -fx-background-color: #ffffff;">
@@ -23,6 +23,6 @@
         </placeholder>
     </ListView>
 
-    <Button text="Join" onAction="#onJoinPublic" prefWidth="200" style="-fx-background-color: #f06292; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 4; -fx-padding: 8 16;"/>
+    <Button fx:id="joinButton" text="Join" onAction="#onJoinPublic" prefWidth="200" style="-fx-background-color: #f06292; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 4; -fx-padding: 8 16;"/>
 
 </VBox>

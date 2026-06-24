@@ -11,6 +11,7 @@ import frolenko.client.service.GalleryService;
 import frolenko.client.service.RoomService;
 import frolenko.client.ui.CanvasPane;
 import frolenko.client.util.AlertHelper;
+import frolenko.client.util.UiUtil;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -34,6 +35,7 @@ public class RoomController {
     @FXML private ListView<String> nicknameListView;
     @FXML private Button saveButton;
     @FXML private Button closeRoomButton;
+    @FXML private Button leaveButton;
 
     private CanvasPane canvasPane;
     private boolean listenerRegistered = false;
@@ -105,13 +107,18 @@ public class RoomController {
     public void onLeave() {
         RoomState room = appState.getCurrentRoom();
         if (room == null) return;
+        Runnable unblock = UiUtil.withLoading(leaveButton);
         roomService.leaveRoom(room.getRoomId(),
                 () -> Platform.runLater(() -> {
+                    unblock.run();
                     if (canvasPane != null) canvasPane.shutdown();
                     viewManager.clearView(AppView.ROOM);
                     viewManager.navigateTo(AppView.MAIN);
                 }),
-                error -> Platform.runLater(() -> AlertHelper.showError(error))
+                error -> Platform.runLater(() -> {
+                    unblock.run();
+                    AlertHelper.showError(error);
+                })
         );
     }
 
@@ -120,13 +127,18 @@ public class RoomController {
         RoomState room = appState.getCurrentRoom();
         if (room == null) return;
         if (!AlertHelper.confirmDelete("this room")) return;
+        Runnable unblock = UiUtil.withLoading(closeRoomButton);
         roomService.closeRoom(room.getRoomId(), appState.getToken(),
                 () -> Platform.runLater(() -> {
+                    unblock.run();
                     if (canvasPane != null) canvasPane.shutdown();
                     viewManager.clearView(AppView.ROOM);
                     viewManager.navigateTo(AppView.MAIN);
                 }),
-                error -> Platform.runLater(() -> AlertHelper.showError(error))
+                error -> Platform.runLater(() -> {
+                    unblock.run();
+                    AlertHelper.showError(error);
+                })
         );
     }
 }

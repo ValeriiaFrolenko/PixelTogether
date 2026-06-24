@@ -4,6 +4,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import common.network.KeyStore;
 import common.utils.RsaUtil;
+import frolenko.client.core.AppState;
+import javafx.application.Platform;
 
 import javax.crypto.KeyGenerator;
 import java.io.DataInputStream;
@@ -21,14 +23,17 @@ public class ClientConnection {
     private final ClientReceiverService receiverService;
     private final ClientSenderService senderService;
     private final KeyStore keyStore;
+    private final AppState appState;
 
     @Inject
     public ClientConnection(ClientReceiverService receiverService,
                             ClientSenderService senderService,
-                            KeyStore keyStore) {
+                            KeyStore keyStore,
+                            AppState appState) {
         this.receiverService = receiverService;
         this.senderService = senderService;
         this.keyStore = keyStore;
+        this.appState = appState;
     }
 
     public void start() {
@@ -38,9 +43,11 @@ public class ClientConnection {
                 performHandshake(socket);
                 senderService.connect(socket);
                 receiverService.connect(socket);
+                Platform.runLater(() -> appState.setServerAvailable(true));
                 waitUntilDisconnected(socket);
             } catch (IOException e) {
                 System.err.println("Server unavailable, retrying in " + RECONNECT_DELAY_MS + "ms");
+                Platform.runLater(() -> appState.setServerAvailable(false));
                 try {
                     Thread.sleep(RECONNECT_DELAY_MS);
                 } catch (InterruptedException ie) {
@@ -49,6 +56,7 @@ public class ClientConnection {
                 }
             } catch (Exception e) {
                 System.err.println("Handshake failed: " + e.getMessage());
+                Platform.runLater(() -> appState.setServerAvailable(false));
             }
         }
     }

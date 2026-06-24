@@ -5,8 +5,10 @@ import com.google.inject.Singleton;
 import frolenko.client.core.AppState;
 import frolenko.client.core.RoomState;
 import frolenko.client.service.RoomService;
+import frolenko.client.util.UiUtil;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -26,6 +28,7 @@ public class CreateRoomDialogController {
     @FXML private TextField durationField;
     @FXML private CheckBox privateCheckBox;
     @FXML private Label errorLabel;
+    @FXML private Button createButton;
 
     private Consumer<RoomState> onCreated;
 
@@ -68,13 +71,18 @@ public class CreateRoomDialogController {
             return;
         }
 
+        Runnable unblock = UiUtil.withLoading(createButton);
         roomService.createRoom(
                 appState.getToken(), name, canvasW, canvasH, privateCheckBox.isSelected(), duration,
                 room -> Platform.runLater(() -> {
+                    unblock.run();
                     if (onCreated != null) onCreated.accept(room);
                     closeStage();
                 }),
-                error -> Platform.runLater(() -> errorLabel.setText(error))
+                error -> Platform.runLater(() -> {
+                    unblock.run();
+                    errorLabel.setText(error);
+                })
         );
     }
 

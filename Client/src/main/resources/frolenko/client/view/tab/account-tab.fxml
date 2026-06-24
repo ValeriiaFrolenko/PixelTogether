@@ -15,9 +15,9 @@
         <PasswordField fx:id="passwordField" promptText="Password"
                        style="-fx-background-radius: 4; -fx-border-color: #f8bbd0; -fx-border-radius: 4; -fx-background-color: #ffffff;"/>
         <HBox spacing="10" alignment="CENTER">
-            <Button text="Login" onAction="#onLogin" prefWidth="100"
+            <Button fx:id="loginButton" text="Login" onAction="#onLogin" prefWidth="100"
                     style="-fx-background-color: #f06292; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 4; -fx-padding: 6 12;"/>
-            <Button text="Register" onAction="#onRegister" prefWidth="100"
+            <Button fx:id="registerButton" text="Register" onAction="#onRegister" prefWidth="100"
                     style="-fx-background-color: #fce4ec; -fx-border-color: #f06292; -fx-border-radius: 4; -fx-background-radius: 4; -fx-text-fill: #880e4f; -fx-font-weight: bold; -fx-padding: 6 12;"/>
         </HBox>
         <Label fx:id="authErrorLabel" style="-fx-text-fill: #d32f2f; -fx-font-size: 11;"/>

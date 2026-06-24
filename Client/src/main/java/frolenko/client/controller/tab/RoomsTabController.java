@@ -4,11 +4,12 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import common.dto.room.RoomInfo;
 import frolenko.client.config.AppView;
+import frolenko.client.core.AppState;
 import frolenko.client.core.ViewManager;
 import frolenko.client.controller.dialog.CreateRoomDialogController;
-import frolenko.client.core.AppState;
 import frolenko.client.service.RoomService;
 import frolenko.client.util.AlertHelper;
+import frolenko.client.util.UiUtil;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -25,6 +26,9 @@ public class RoomsTabController {
 
     @FXML private ListView<RoomInfo> roomListView;
     @FXML private Button createRoomButton;
+    @FXML private Button joinButton;
+    @FXML private Button refreshButton;
+    @FXML private Button joinPrivateButton;
     @FXML private TextField privateCodeField;
 
     @Inject
@@ -57,9 +61,16 @@ public class RoomsTabController {
 
     @FXML
     public void onRefreshRooms() {
+        Runnable unblock = UiUtil.withLoading(refreshButton);
         roomService.getRooms(
-                rooms -> Platform.runLater(() -> appState.getRooms().setAll(rooms)),
-                error -> Platform.runLater(() -> AlertHelper.showError(error))
+                rooms -> Platform.runLater(() -> {
+                    unblock.run();
+                    appState.getRooms().setAll(rooms);
+                }),
+                error -> Platform.runLater(() -> {
+                    unblock.run();
+                    AlertHelper.showError(error);
+                })
         );
     }
 
@@ -70,9 +81,17 @@ public class RoomsTabController {
             AlertHelper.showError("Select a room first.");
             return;
         }
+        Runnable unblock = UiUtil.withLoading(joinButton);
         roomService.joinPublic(selected.roomId(),
-                room -> Platform.runLater(() -> viewManager.navigateTo(AppView.ROOM)),
-                error -> Platform.runLater(() -> AlertHelper.showError(error))
+                room -> Platform.runLater(() -> {
+                    System.out.println("join success, unblocking");
+                    unblock.run();
+                    viewManager.navigateTo(AppView.ROOM);
+                }),
+                error -> Platform.runLater(() -> {
+                    unblock.run();
+                    AlertHelper.showError(error);
+                })
         );
     }
 
@@ -83,9 +102,16 @@ public class RoomsTabController {
             AlertHelper.showError("Enter a room code.");
             return;
         }
+        Runnable unblock = UiUtil.withLoading(joinPrivateButton);
         roomService.joinPrivate(code,
-                room -> Platform.runLater(() -> viewManager.navigateTo(AppView.ROOM)),
-                error -> Platform.runLater(() -> AlertHelper.showError(error))
+                room -> Platform.runLater(() -> {
+                    unblock.run();
+                    viewManager.navigateTo(AppView.ROOM);
+                }),
+                error -> Platform.runLater(() -> {
+                    unblock.run();
+                    AlertHelper.showError(error);
+                })
         );
     }
 

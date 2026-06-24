@@ -4,8 +4,10 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import frolenko.client.core.AppState;
 import frolenko.client.service.GalleryService;
+import frolenko.client.util.UiUtil;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -20,6 +22,7 @@ public class SaveWorkDialogController {
     @FXML private TextField titleField;
     @FXML private CheckBox publicCheckBox;
     @FXML private Label errorLabel;
+    @FXML private Button saveButton;
 
     @Inject
     public SaveWorkDialogController(GalleryService galleryService, AppState appState) {
@@ -38,9 +41,16 @@ public class SaveWorkDialogController {
         int roomId = appState.getCurrentRoom().getRoomId();
         String token = appState.getToken();
 
+        Runnable unblock = UiUtil.withLoading(saveButton);
         galleryService.saveWork(roomId, token, title, publicCheckBox.isSelected(),
-                () -> Platform.runLater(this::closeStage),
-                error -> Platform.runLater(() -> errorLabel.setText(error))
+                () -> Platform.runLater(() -> {
+                    unblock.run();
+                    closeStage();
+                }),
+                error -> Platform.runLater(() -> {
+                    unblock.run();
+                    errorLabel.setText(error);
+                })
         );
     }
 

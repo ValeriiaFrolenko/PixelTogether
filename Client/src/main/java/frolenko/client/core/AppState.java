@@ -3,10 +3,7 @@ package frolenko.client.core;
 import com.google.inject.Singleton;
 import common.dto.room.RoomInfo;
 import common.dto.work.GalleryItem;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -22,6 +19,9 @@ public class AppState {
     private final ObjectProperty<RoomState> currentRoom = new SimpleObjectProperty<>(null);
     private final ObservableList<RoomInfo> rooms = FXCollections.observableArrayList();
     private final ObservableList<GalleryItem> gallery = FXCollections.observableArrayList();
+
+    private final BooleanProperty serverAvailable =
+            new SimpleBooleanProperty(false);
 
     public long getSessionId() { return sessionId; }
 
@@ -41,6 +41,10 @@ public class AppState {
     public ObservableList<GalleryItem> getGallery() { return gallery; }
 
     public boolean isLoggedIn() { return token.get() != null; }
+
+    public boolean isServerAvailable() { return serverAvailable.get(); }
+    public void setServerAvailable(boolean available) { serverAvailable.set(available); }
+    public BooleanProperty serverAvailableProperty() { return serverAvailable; }
 
     public void clear() {
         token.set(null);

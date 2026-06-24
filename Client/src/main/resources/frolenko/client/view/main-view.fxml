@@ -3,16 +3,20 @@
 <?import javafx.scene.layout.*?>
 <?import java.net.URL?>
 
-<StackPane xmlns="http://javafx.com/javafx"
-           xmlns:fx="http://javafx.com/fxml"
-           fx:controller="frolenko.client.controller.MainController"
-           style="-fx-background-color: #fff5f7;">
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="frolenko.client.controller.MainController"
+      style="-fx-background-color: #fff5f7;">
 
     <stylesheets>
         <URL value="@styles.css" />
     </stylesheets>
 
-    <TabPane tabClosingPolicy="UNAVAILABLE" styleClass="custom-tab-pane">
+    <Label fx:id="serverBanner" text="Server unavailable" managed="false" visible="false"
+           maxWidth="Infinity"
+           style="-fx-background-color: #d32f2f; -fx-text-fill: white; -fx-padding: 8; -fx-font-weight: bold; -fx-alignment: CENTER;"/>
+
+    <TabPane VBox.vgrow="ALWAYS" tabClosingPolicy="UNAVAILABLE" styleClass="custom-tab-pane">
         <Tab text="Rooms">
             <fx:include source="tab/rooms-tab.fxml"/>
         </Tab>
@@ -24,4 +28,4 @@
         </Tab>
     </TabPane>
 
-</StackPane>
+</VBox>
