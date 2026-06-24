@@ -50,14 +50,11 @@ public class DrawHandler extends BaseHandler {
 
         roomManager.applyPixels(roomId, valid);
 
-        dispatcher.sendToRoom(roomId, Packet.builder()
-                .sessionId(sessionId)
-                .bPktId(0)
-                .bMsg(Message.builder()
-                        .cType(CommandType.DRAW.getCode())
-                        .roomId(roomId)
-                        .payload(JsonUtil.toBytes(new DrawRequest(valid)))
-                        .build())
+        dispatcher.sendToRoom(roomId, Message.builder()
+                .cType(CommandType.DRAW.getCode())
+                .roomId(roomId)
+                .payload(JsonUtil.toBytes(new DrawRequest(valid)))
                 .build());
+
     }
 }

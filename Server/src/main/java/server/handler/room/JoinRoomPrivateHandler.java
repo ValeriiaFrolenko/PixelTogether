@@ -71,14 +71,10 @@ public class JoinRoomPrivateHandler extends BaseHandler {
                 new CanvasStateResponse(canvasState.roomId(), canvasState.width(), canvasState.height(), canvasState.pixels(), isOwner)
         ));
 
-        dispatcher.sendToRoom(room.id(), Packet.builder()
-                .sessionId(sessionId)
-                .bPktId(0)
-                .bMsg(Message.builder()
-                        .cType(CommandType.PARTICIPANT_JOINED.getCode())
-                        .roomId(room.id())
-                        .payload(JsonUtil.toBytes(new ParticipantEvent(nickname)))
-                        .build())
+        dispatcher.sendToRoom(room.id(), Message.builder()
+                .cType(CommandType.PARTICIPANT_JOINED.getCode())
+                .roomId(room.id())
+                .payload(JsonUtil.toBytes(new ParticipantEvent(nickname)))
                 .build());
     }
 }

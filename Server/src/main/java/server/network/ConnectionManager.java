@@ -5,6 +5,7 @@ import com.google.inject.Singleton;
 import java.net.Socket;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Singleton
@@ -49,6 +50,11 @@ public class ConnectionManager {
     public Collection<Socket> getSocketsByRoom(int roomId) {
         ConcurrentHashMap<Long, Socket> room = roomSockets.get(roomId);
         return room != null ? room.values() : Collections.emptyList();
+    }
+
+    public Map<Long, Socket> getSessionSocketsByRoom(int roomId) {
+        ConcurrentHashMap<Long, Socket> room = roomSockets.get(roomId);
+        return room != null ? Collections.unmodifiableMap(room) : Collections.emptyMap();
     }
 
     public int countByRoom(int roomId) {

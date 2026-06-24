@@ -84,14 +84,10 @@ public class RoomManager {
     }
 
     private void notifyRoomClosed(int roomId) {
-        dispatcher.sendToRoom(roomId, Packet.builder()
-                .sessionId(0)
-                .bPktId(0)
-                .bMsg(Message.builder()
-                        .cType(CommandType.ROOM_CLOSED.getCode())
-                        .roomId(roomId)
-                        .payload(new byte[0])
-                        .build())
+        dispatcher.sendToRoom(roomId, Message.builder()
+                .cType(CommandType.ROOM_CLOSED.getCode())
+                .roomId(roomId)
+                .payload(new byte[0])
                 .build());
     }
 

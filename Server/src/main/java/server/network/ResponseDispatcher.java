@@ -3,6 +3,7 @@ package server.network;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import common.model.Message;
 import common.model.Packet;
 import common.protocol.CommandType;
 import common.protocol.Encryptor;
@@ -49,15 +50,23 @@ public class ResponseDispatcher {
         );
     }
 
-    public void sendToRoom(int roomId, Packet packet) {
-        CommandType type = CommandType.fromCode(packet.bMsg().cType());
-        log.info(String.format("[SERVER OUT -> Room %d] PktId: %d | Cmd: %s | Room: %d | Payload: %d bytes",
-                roomId, packet.bPktId(), type.name(), packet.bMsg().roomId(), packet.bMsg().payload().length));
+    public void sendToRoom(int roomId, Message message) {
+        CommandType type = CommandType.fromCode(message.cType());
+        log.info(String.format("[SERVER OUT -> Room %d] Cmd: %s | Room: %d | Payload: %d bytes",
+                roomId, type.name(), message.roomId(), message.payload().length));
 
-        Collection<Socket> sockets = new ArrayList<>(connectionManager.getSocketsByRoom(roomId));        encryptorPool.submit(() ->
-                encryptor.encrypt(packet, encrypted ->
-                        senderPool.submit(() -> sender.sendToRoom(sockets, encrypted))
-                )
-        );
+        connectionManager.getSessionSocketsByRoom(roomId).forEach((sessionId, socket) -> {
+            Packet packet = Packet.builder()
+                    .sessionId(sessionId)
+                    .bPktId(0)
+                    .bMsg(message)
+                    .build();
+
+            encryptorPool.submit(() ->
+                    encryptor.encrypt(packet, encrypted ->
+                            senderPool.submit(() -> sender.sendToClient(sessionId, encrypted))
+                    )
+            );
+        });
     }
 }

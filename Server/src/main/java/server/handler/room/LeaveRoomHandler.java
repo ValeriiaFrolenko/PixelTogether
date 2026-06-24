@@ -38,14 +38,10 @@ public class LeaveRoomHandler extends BaseHandler {
 
         sendOk(sessionId, packet.bPktId());
 
-        dispatcher.sendToRoom(roomId, Packet.builder()
-                .sessionId(sessionId)
-                .bPktId(0)
-                .bMsg(Message.builder()
-                        .cType(CommandType.PARTICIPANT_LEFT.getCode())
-                        .roomId(roomId)
-                        .payload(JsonUtil.toBytes(new ParticipantEvent(nickname)))
-                        .build())
+        dispatcher.sendToRoom(roomId, Message.builder()
+                .cType(CommandType.PARTICIPANT_LEFT.getCode())
+                .roomId(roomId)
+                .payload(JsonUtil.toBytes(new ParticipantEvent(nickname)))
                 .build());
     }
 }
