@@ -37,7 +37,8 @@ public enum CommandType {
     PARTICIPANT_JOINED(107),
     PARTICIPANT_LEFT(108),
     MY_WORKS(109),
-    MY_ROOMS(110);
+    MY_ROOMS(110),
+    ROOM_CLOSED(111);
 
     private final int code;
 

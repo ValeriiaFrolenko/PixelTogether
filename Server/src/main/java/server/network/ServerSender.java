@@ -23,8 +23,7 @@ public class ServerSender implements Sender {
     }
 
     @Override
-    public void sendToRoom(int roomId, byte[] packet) {
-        Collection<Socket> sockets = connectionManager.getSocketsByRoom(roomId);
+    public void sendToRoom(Collection<Socket> sockets, byte[] packet) {
         for (Socket socket : sockets) {
             send(socket, packet);
         }

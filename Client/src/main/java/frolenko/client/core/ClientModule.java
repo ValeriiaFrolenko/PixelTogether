@@ -13,6 +13,7 @@ import common.protocol.*;
 import frolenko.client.handler.DrawPushHandler;
 import frolenko.client.handler.ParticipantJoinedHandler;
 import frolenko.client.handler.ParticipantLeftHandler;
+import frolenko.client.handler.RoomClosedHandler;
 import frolenko.client.network.ClientKeyStore;
 import frolenko.client.network.ClientReceiver;
 import frolenko.client.network.ClientReceiverFactory;
@@ -44,6 +45,7 @@ public class ClientModule extends AbstractModule {
         pushBinder.addBinding(CommandType.DRAW).to(DrawPushHandler.class);
         pushBinder.addBinding(CommandType.PARTICIPANT_JOINED).to(ParticipantJoinedHandler.class);
         pushBinder.addBinding(CommandType.PARTICIPANT_LEFT).to(ParticipantLeftHandler.class);
+        pushBinder.addBinding(CommandType.ROOM_CLOSED).to(RoomClosedHandler.class);
     }
 
     @Provides @Singleton @Named("receiverPool")

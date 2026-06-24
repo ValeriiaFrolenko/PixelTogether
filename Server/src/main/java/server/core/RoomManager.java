@@ -4,9 +4,13 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import common.dto.draw.PixelUpdate;
 import common.dto.room.CanvasStateResponse;
+import common.model.Message;
+import common.model.Packet;
+import common.protocol.CommandType;
 import server.database.dao.RoomDao;
 import server.database.model.Room;
 import server.network.ConnectionManager;
+import server.network.ResponseDispatcher;
 
 import java.nio.ByteBuffer;
 import java.time.LocalDateTime;
@@ -31,12 +35,14 @@ public class RoomManager {
     private final ConcurrentHashMap<Integer, ActiveRoom> rooms = new ConcurrentHashMap<>();
     private final RoomDao roomDao;
     private final ConnectionManager connectionManager;
+    private final ResponseDispatcher dispatcher;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     @Inject
-    public RoomManager(RoomDao roomDao, ConnectionManager connectionManager) {
+    public RoomManager(RoomDao roomDao, ConnectionManager connectionManager, ResponseDispatcher dispatcher) {
         this.roomDao = roomDao;
         this.connectionManager = connectionManager;
+        this.dispatcher = dispatcher;
         scheduler.scheduleAtFixedRate(this::flushAll, 1, 1, TimeUnit.SECONDS);
         scheduler.scheduleAtFixedRate(this::deleteExpired, 60, 60, TimeUnit.SECONDS);
         Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
@@ -59,6 +65,7 @@ public class RoomManager {
     }
 
     public void deleteRoom(int roomId) {
+        notifyRoomClosed(roomId);
         rooms.remove(roomId);
         roomDao.deleteById(roomId);
         connectionManager.clearRoom(roomId);
@@ -67,12 +74,25 @@ public class RoomManager {
     public void deleteExpired() {
         rooms.entrySet().removeIf(entry -> {
             if (entry.getValue().room().expiresAt().isBefore(LocalDateTime.now())) {
+                notifyRoomClosed(entry.getKey());
                 connectionManager.clearRoom(entry.getKey());
                 roomDao.deleteById(entry.getKey());
                 return true;
             }
             return false;
         });
+    }
+
+    private void notifyRoomClosed(int roomId) {
+        dispatcher.sendToRoom(roomId, Packet.builder()
+                .sessionId(0)
+                .bPktId(0)
+                .bMsg(Message.builder()
+                        .cType(CommandType.ROOM_CLOSED.getCode())
+                        .roomId(roomId)
+                        .payload(new byte[0])
+                        .build())
+                .build());
     }
 
     public Room getRoom(int roomId) {
