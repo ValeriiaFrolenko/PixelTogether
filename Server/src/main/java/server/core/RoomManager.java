@@ -45,7 +45,22 @@ public class RoomManager {
         this.dispatcher = dispatcher;
         scheduler.scheduleAtFixedRate(this::flushAll, 1, 1, TimeUnit.SECONDS);
         scheduler.scheduleAtFixedRate(this::deleteExpired, 60, 60, TimeUnit.SECONDS);
+        initializeRooms();
         Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
+    }
+
+    private void initializeRooms() {
+        roomDao.findAll().forEach(room -> {
+            int size = room.canvasW() * room.canvasH();
+            AtomicIntegerArray canvas = new AtomicIntegerArray(size);
+            if (room.canvasState() != null) {
+                ByteBuffer buf = ByteBuffer.wrap(room.canvasState());
+                for (int i = 0; i < size; i++) {
+                    canvas.set(i, buf.getInt());
+                }
+            }
+            rooms.put(room.id(), new ActiveRoom(room, room.canvasW(), room.canvasH(), canvas));
+        });
     }
 
     private int index(int x, int y, int width) {

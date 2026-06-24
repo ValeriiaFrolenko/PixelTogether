@@ -5,6 +5,8 @@ import com.google.inject.Singleton;
 import server.database.JdbcTemplate;
 import server.database.model.Room;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,18 +31,7 @@ public class RoomDao {
     public Optional<Room> findById(int id) {
         return jdbc.queryOne(
                 "SELECT * FROM rooms WHERE id = ?",
-                rs -> Room.builder()
-                        .id(rs.getInt("id"))
-                        .name(rs.getString("name"))
-                        .code(rs.getString("code"))
-                        .ownerId(rs.getInt("owner_id"))
-                        .isPrivate(rs.getBoolean("is_private"))
-                        .canvasW(rs.getInt("canvas_w"))
-                        .canvasH(rs.getInt("canvas_h"))
-                        .canvasState(rs.getBytes("canvas_state"))
-                        .expiresAt(rs.getTimestamp("expires_at").toLocalDateTime())
-                        .createdAt(rs.getTimestamp("created_at").toLocalDateTime())
-                        .build(),
+                this::createRoom,
                 id
         );
     }
@@ -48,18 +39,7 @@ public class RoomDao {
     public Optional<Room> findByCode(String code) {
         return jdbc.queryOne(
                 "SELECT * FROM rooms WHERE code = ?",
-                rs -> Room.builder()
-                        .id(rs.getInt("id"))
-                        .name(rs.getString("name"))
-                        .code(rs.getString("code"))
-                        .ownerId(rs.getInt("owner_id"))
-                        .isPrivate(rs.getBoolean("is_private"))
-                        .canvasW(rs.getInt("canvas_w"))
-                        .canvasH(rs.getInt("canvas_h"))
-                        .canvasState(rs.getBytes("canvas_state"))
-                        .expiresAt(rs.getTimestamp("expires_at").toLocalDateTime())
-                        .createdAt(rs.getTimestamp("created_at").toLocalDateTime())
-                        .build(),
+                this::createRoom,
                 code
         );
     }
@@ -67,16 +47,7 @@ public class RoomDao {
     public List<Room> findAllPublic() {
         return jdbc.query(
                 "SELECT * FROM rooms WHERE is_private = FALSE AND expires_at > NOW()",
-                rs -> Room.builder()
-                        .id(rs.getInt("id"))
-                        .name(rs.getString("name"))
-                        .ownerId(rs.getInt("owner_id"))
-                        .isPrivate(false)
-                        .canvasW(rs.getInt("canvas_w"))
-                        .canvasH(rs.getInt("canvas_h"))
-                        .expiresAt(rs.getTimestamp("expires_at").toLocalDateTime())
-                        .createdAt(rs.getTimestamp("created_at").toLocalDateTime())
-                        .build()
+                this::createRoom
         );
     }
 
@@ -98,5 +69,27 @@ public class RoomDao {
         return jdbc.update(
                 "DELETE FROM rooms WHERE expires_at <= NOW()"
         );
+    }
+
+    public List<Room> findAll() {
+        return jdbc.query(
+                "SELECT * FROM rooms WHERE expires_at > NOW()",
+                this::createRoom
+        );
+    }
+
+    private Room createRoom(ResultSet rs) throws SQLException {
+        return Room.builder()
+                .id(rs.getInt("id"))
+                .name(rs.getString("name"))
+                .code(rs.getString("code"))
+                .ownerId(rs.getInt("owner_id"))
+                .isPrivate(rs.getBoolean("is_private"))
+                .canvasW(rs.getInt("canvas_w"))
+                .canvasH(rs.getInt("canvas_h"))
+                .canvasState(rs.getBytes("canvas_state"))
+                .expiresAt(rs.getTimestamp("expires_at").toLocalDateTime())
+                .createdAt(rs.getTimestamp("created_at").toLocalDateTime())
+                .build();
     }
 }
