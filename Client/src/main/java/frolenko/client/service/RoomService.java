@@ -52,7 +52,7 @@ public class RoomService {
 
     public void joinPublic(int roomId, Consumer<RoomState> onSuccess, Consumer<String> onError) {
         serverApi.joinPublic(roomId, packet -> {
-            if (packet.bMsg().cType() == CommandType.OK.getCode()) {
+            if (packet.bMsg().cType() == CommandType.CANVAS_STATE.getCode()) {
                 CanvasStateResponse canvas = JsonUtil.fromBytes(packet.bMsg().payload(), CanvasStateResponse.class);
                 RoomState room = new RoomState(roomId, canvas.width(), canvas.height(), canvas.pixels(), canvas.isOwner());
                 appState.setCurrentRoom(room);
@@ -65,9 +65,9 @@ public class RoomService {
 
     public void joinPrivate(String code, Consumer<RoomState> onSuccess, Consumer<String> onError) {
         serverApi.joinPrivate(code, packet -> {
-            if (packet.bMsg().cType() == CommandType.OK.getCode()) {
+            if (packet.bMsg().cType() == CommandType.CANVAS_STATE.getCode()) {
                 CanvasStateResponse canvas = JsonUtil.fromBytes(packet.bMsg().payload(), CanvasStateResponse.class);
-                RoomState room = new RoomState(canvas.roomId(), canvas.width(), canvas.height(), canvas.pixels(), canvas.isOwner());
+                RoomState room = new RoomState(packet.bMsg().roomId(), canvas.width(), canvas.height(), canvas.pixels(), canvas.isOwner());
                 appState.setCurrentRoom(room);
                 onSuccess.accept(room);
             } else {
@@ -81,8 +81,7 @@ public class RoomService {
                            Consumer<RoomState> onSuccess, Consumer<String> onError) {
         serverApi.createRoom(token, name, canvasW, canvasH, isPrivate, durationMinutes, packet -> {
             if (packet.bMsg().cType() == CommandType.OK.getCode()) {
-                CreateRoomResponse response = JsonUtil.fromBytes(packet.bMsg().payload(), CreateRoomResponse.class);
-                RoomState room = new RoomState((int) response.roomId(), canvasW, canvasH, new int[canvasW * canvasH], true);
+                RoomState room = new RoomState(packet.bMsg().roomId(), canvasW, canvasH, new int[canvasW * canvasH], true);
                 appState.setCurrentRoom(room);
                 onSuccess.accept(room);
             } else {

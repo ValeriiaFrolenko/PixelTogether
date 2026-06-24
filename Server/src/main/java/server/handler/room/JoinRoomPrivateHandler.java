@@ -67,9 +67,16 @@ public class JoinRoomPrivateHandler extends BaseHandler {
         connectionManager.assignRoom(sessionId, room.id());
 
         CanvasStateResponse canvasState = roomManager.getCanvasState(room.id());
-        sendOk(sessionId, packet.bPktId(), JsonUtil.toBytes(
-                new CanvasStateResponse(canvasState.roomId(), canvasState.width(), canvasState.height(), canvasState.pixels(), isOwner)
-        ));
+
+        dispatcher.sendToClient(sessionId, Packet.builder()
+                .sessionId(sessionId)
+                .bPktId(packet.bPktId())
+                .bMsg(Message.builder()
+                        .cType(CommandType.CANVAS_STATE.getCode())
+                        .roomId(room.id())
+                        .payload(JsonUtil.toBytes(canvasState))
+                        .build())
+                .build());
 
         dispatcher.sendToRoom(room.id(), Message.builder()
                 .cType(CommandType.PARTICIPANT_JOINED.getCode())

@@ -4,6 +4,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import common.dto.room.CreateRoomRequest;
 import common.dto.room.CreateRoomResponse;
+import common.model.Message;
+import common.model.Packet;
+import common.protocol.CommandType;
 import common.utils.JsonUtil;
 import server.core.ParticipantManager;
 import server.core.RoomManager;
@@ -76,6 +79,14 @@ public class CreateRoomHandler extends BaseHandler {
         participantManager.assign(sessionId, username);
         connectionManager.assignRoom(sessionId, (int) roomId);
 
-        sendOk(sessionId, packet.bPktId(), JsonUtil.toBytes(new CreateRoomResponse(roomId, code)));
+        dispatcher.sendToClient(sessionId, Packet.builder()
+                .sessionId(sessionId)
+                .bPktId(packet.bPktId())
+                .bMsg(Message.builder()
+                        .cType(CommandType.OK.getCode())
+                        .roomId((int) roomId)
+                        .payload(JsonUtil.toBytes(new CreateRoomResponse(code)))
+                        .build())
+                .build());
     }
 }
