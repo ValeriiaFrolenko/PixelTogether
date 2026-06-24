@@ -50,43 +50,26 @@ public class ClientModule extends AbstractModule {
 
     @Provides @Singleton @Named("receiverPool")
     ExecutorService provideReceiverPool() {
-        return Executors.newCachedThreadPool();
-    }
-
-    @Provides @Singleton @Named("decryptorPool")
-    ExecutorService provideDecryptorPool() {
-        return Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-    }
-
-    @Provides @Singleton @Named("encryptorPool")
-    ExecutorService provideEncryptorPool() {
-        return Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        return Executors.newSingleThreadExecutor();
     }
 
     @Provides @Singleton @Named("senderPool")
     ExecutorService provideSenderPool() {
-        return Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
+        return Executors.newSingleThreadExecutor();
     }
 
-    @Provides
-    @Singleton
-    @Named("handleStep")
+    @Provides @Singleton @Named("handleStep")
     Consumer<Packet> provideHandleStep(ResponseManager responseManager) {
         return responseManager::handle;
     }
 
-    @Provides
-    @Singleton
-    @Named("decryptStep")
+    @Provides @Singleton @Named("decryptStep")
     Consumer<byte[]> provideDecryptStep(Decryptor decryptor,
-                                        @Named("decryptorPool") ExecutorService decryptorPool,
                                         @Named("handleStep") Consumer<Packet> handleStep) {
-        return bytes -> decryptorPool.submit(() -> decryptor.decrypt(bytes, handleStep));
+        return bytes -> decryptor.decrypt(bytes, handleStep);
     }
 
-    @Provides
-    @Singleton
-    @Named("receiveStep")
+    @Provides @Singleton @Named("receiveStep")
     Consumer<Socket> provideReceiveStep(ClientReceiverFactory receiverFactory,
                                         @Named("receiverPool") ExecutorService receiverPool) {
         return socket -> receiverPool.submit(receiverFactory.create(socket));

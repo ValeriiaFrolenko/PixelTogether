@@ -20,7 +20,6 @@ public class ClientSenderService {
     @Inject private Encryptor encryptor;
     @Inject private ClientSender clientSender;
     @Inject private ResponseManager responseManager;
-    @Inject @Named("encryptorPool") private ExecutorService encryptorPool;
     @Inject @Named("senderPool") private ExecutorService senderPool;
 
     public void connect(Socket socket) {
@@ -33,8 +32,6 @@ public class ClientSenderService {
                 packet.bPktId(), type.name(), packet.bMsg().roomId(), packet.bMsg().payload().length));
 
         responseManager.register(packet.bPktId(), callback);
-        encryptorPool.submit(() ->
-                encryptor.encrypt(packet, encrypted ->
-                        senderPool.submit(() -> clientSender.send(encrypted))));
+        senderPool.submit(() -> encryptor.encrypt(packet, clientSender::send));
     }
 }
