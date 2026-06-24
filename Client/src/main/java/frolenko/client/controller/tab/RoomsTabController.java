@@ -61,16 +61,9 @@ public class RoomsTabController {
 
     @FXML
     public void onRefreshRooms() {
-        Runnable unblock = UiUtil.withLoading(refreshButton);
         roomService.getRooms(
-                rooms -> Platform.runLater(() -> {
-                    unblock.run();
-                    appState.getRooms().setAll(rooms);
-                }),
-                error -> Platform.runLater(() -> {
-                    unblock.run();
-                    AlertHelper.showError(error);
-                })
+                rooms -> Platform.runLater(() -> appState.getRooms().setAll(rooms)),
+                error -> Platform.runLater(() -> AlertHelper.showError(error))
         );
     }
 
@@ -84,7 +77,6 @@ public class RoomsTabController {
         Runnable unblock = UiUtil.withLoading(joinButton);
         roomService.joinPublic(selected.roomId(),
                 room -> Platform.runLater(() -> {
-                    System.out.println("join success, unblocking");
                     unblock.run();
                     viewManager.navigateTo(AppView.ROOM);
                 }),

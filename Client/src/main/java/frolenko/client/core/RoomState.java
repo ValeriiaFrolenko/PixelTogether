@@ -12,6 +12,8 @@ public class RoomState {
     private final boolean isOwner;
     private final ObservableList<String> nicknames = FXCollections.observableArrayList();
 
+    private Runnable onPixelChanged;
+
     public RoomState(int roomId, int width, int height, int[] pixels, boolean isOwner) {
         this.roomId = roomId;
         this.width = width;
@@ -27,8 +29,15 @@ public class RoomState {
     public boolean isOwner() { return isOwner; }
     public ObservableList<String> getNicknames() { return nicknames; }
 
+    public void setOnPixelChanged(Runnable onPixelChanged) {
+        this.onPixelChanged = onPixelChanged;
+    }
+
     public void setPixel(int x, int y, int color) {
         pixels[y * width + x] = color;
+        if (onPixelChanged != null) {
+            onPixelChanged.run();
+        }
     }
 
     public int getPixel(int x, int y) {

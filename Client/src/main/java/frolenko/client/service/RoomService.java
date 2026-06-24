@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import common.dto.ErrorResponse;
 import common.dto.room.CanvasStateResponse;
-import common.dto.room.CreateRoomResponse;
 import common.dto.room.MyRoomInfo;
 import common.dto.room.RoomInfo;
 import common.protocol.CommandType;
@@ -55,6 +54,9 @@ public class RoomService {
             if (packet.bMsg().cType() == CommandType.CANVAS_STATE.getCode()) {
                 CanvasStateResponse canvas = JsonUtil.fromBytes(packet.bMsg().payload(), CanvasStateResponse.class);
                 RoomState room = new RoomState(roomId, canvas.width(), canvas.height(), canvas.pixels(), canvas.isOwner());
+                if (canvas.nicknames() != null) {
+                    room.getNicknames().addAll(canvas.nicknames());
+                }
                 appState.setCurrentRoom(room);
                 onSuccess.accept(room);
             } else {
@@ -68,6 +70,9 @@ public class RoomService {
             if (packet.bMsg().cType() == CommandType.CANVAS_STATE.getCode()) {
                 CanvasStateResponse canvas = JsonUtil.fromBytes(packet.bMsg().payload(), CanvasStateResponse.class);
                 RoomState room = new RoomState(packet.bMsg().roomId(), canvas.width(), canvas.height(), canvas.pixels(), canvas.isOwner());
+                if (canvas.nicknames() != null) {
+                    room.getNicknames().addAll(canvas.nicknames());
+                }
                 appState.setCurrentRoom(room);
                 onSuccess.accept(room);
             } else {

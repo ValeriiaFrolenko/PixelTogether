@@ -70,20 +70,13 @@ public class GalleryTabController {
 
     @FXML
     public void onRefresh() {
-        Runnable unblock = UiUtil.withLoading(refreshButton);
         String title = titleFilter.getText().trim();
         String author = authorFilter.getText().trim();
         galleryService.getGallery(
                 title.isEmpty() ? null : title,
                 author.isEmpty() ? null : author,
-                items -> Platform.runLater(() -> {
-                    unblock.run();
-                    appState.getGallery().setAll(items);
-                }),
-                error -> Platform.runLater(() -> {
-                    unblock.run();
-                    AlertHelper.showError(error);
-                })
+                items -> Platform.runLater(() -> appState.getGallery().setAll(items)),
+                error -> Platform.runLater(() -> AlertHelper.showError(error))
         );
     }
 

@@ -55,6 +55,8 @@ public class CanvasPane extends Canvas {
         this.drawService = drawService;
         this.readOnly = readOnly;
 
+        roomState.setOnPixelChanged(() -> dirty = true);
+
         widthProperty().addListener((obs, o, n) -> {
             if (!centered && n.doubleValue() > 0 && getHeight() > 0) {
                 centerView();
@@ -134,13 +136,18 @@ public class CanvasPane extends Canvas {
         for (int y = 0; y < canvasH; y++) {
             for (int x = 0; x < canvasW; x++) {
                 int argb = roomState.getPixel(x, y);
-                Color color = (argb == 0) ? Color.WHITE : Color.rgb(
-                        (argb >> 16) & 0xFF,
-                        (argb >> 8) & 0xFF,
-                        argb & 0xFF
-                );
-                gc.setFill(color);
-                gc.fillRect(offsetX + x * zoom, offsetY + y * zoom, zoom, zoom);
+                if ((argb & 0xFF000000) != 0) {
+                    Color color = Color.rgb(
+                            (argb >> 16) & 0xFF,
+                            (argb >> 8) & 0xFF,
+                            argb & 0xFF
+                    );
+                    gc.setFill(color);
+                    gc.fillRect(offsetX + x * zoom, offsetY + y * zoom, zoom, zoom);
+                } else {
+                    gc.setFill(Color.WHITE);
+                    gc.fillRect(offsetX + x * zoom, offsetY + y * zoom, zoom, zoom);
+                }
             }
         }
 
@@ -210,7 +217,6 @@ public class CanvasPane extends Canvas {
 
         int argb = colorToArgb(selectedColor);
         roomState.setPixel(px, py, argb);
-        dirty = true;
 
         synchronized (pendingPixels) {
             pendingPixels.removeIf(p -> p.x() == px && p.y() == py);

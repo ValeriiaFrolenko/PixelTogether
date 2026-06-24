@@ -19,6 +19,7 @@ import common.model.Message;
 import common.model.Packet;
 import common.protocol.CommandType;
 
+import java.util.List;
 import java.util.Optional;
 
 @Singleton
@@ -66,6 +67,13 @@ public class JoinRoomPrivateHandler extends BaseHandler {
         participantManager.assign(sessionId, nickname);
         connectionManager.assignRoom(sessionId, room.id());
 
+        List<String> currentNicknames = connectionManager.getSessionSocketsByRoom(room.id())
+                .keySet()
+                .stream()
+                .map(participantManager::get)
+                .filter(n -> n != null && !n.equals(nickname))
+                .toList();
+
         CanvasStateResponse canvasState = roomManager.getCanvasState(room.id());
 
         dispatcher.sendToClient(sessionId, Packet.builder()
@@ -74,7 +82,13 @@ public class JoinRoomPrivateHandler extends BaseHandler {
                 .bMsg(Message.builder()
                         .cType(CommandType.CANVAS_STATE.getCode())
                         .roomId(room.id())
-                        .payload(JsonUtil.toBytes(canvasState))
+                        .payload(JsonUtil.toBytes(new CanvasStateResponse(
+                                canvasState.width(),
+                                canvasState.height(),
+                                canvasState.pixels(),
+                                isOwner,
+                                currentNicknames
+                        )))
                         .build())
                 .build());
 

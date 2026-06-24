@@ -19,6 +19,8 @@ import common.model.Message;
 import common.model.Packet;
 import common.protocol.CommandType;
 
+import java.util.List;
+
 @Singleton
 public class JoinRoomPublicHandler extends BaseHandler {
 
@@ -64,6 +66,13 @@ public class JoinRoomPublicHandler extends BaseHandler {
         participantManager.assign(sessionId, nickname);
         connectionManager.assignRoom(sessionId, roomId);
 
+        List<String> currentNicknames = connectionManager.getSessionSocketsByRoom(roomId)
+                .keySet()
+                .stream()
+                .map(participantManager::get)
+                .filter(n -> n != null && !n.equals(nickname))
+                .toList();
+
         CanvasStateResponse canvasState = roomManager.getCanvasState(roomId);
         dispatcher.sendToClient(sessionId, Packet.builder()
                 .sessionId(sessionId)
@@ -71,7 +80,13 @@ public class JoinRoomPublicHandler extends BaseHandler {
                 .bMsg(Message.builder()
                         .cType(CommandType.CANVAS_STATE.getCode())
                         .roomId(room.id())
-                        .payload(JsonUtil.toBytes(canvasState))
+                        .payload(JsonUtil.toBytes(new CanvasStateResponse(
+                                canvasState.width(),
+                                canvasState.height(),
+                                canvasState.pixels(),
+                                isOwner,
+                                currentNicknames
+                        )))
                         .build())
                 .build());
 
