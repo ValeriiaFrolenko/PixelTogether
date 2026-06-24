@@ -32,7 +32,7 @@
     </top>
 
     <center>
-        <Pane fx:id="canvasContainer" style="-fx-background-color: #e0e0e0;"/>
+        <AnchorPane fx:id="canvasContainer" style="-fx-background-color: #e0e0e0;"/>
     </center>
 
 </BorderPane>

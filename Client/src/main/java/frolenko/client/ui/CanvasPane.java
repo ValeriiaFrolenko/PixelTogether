@@ -9,7 +9,6 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
@@ -18,15 +17,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class CanvasPane extends Pane {
+public class CanvasPane extends Canvas {
 
     private static final double MIN_ZOOM = 1.0;
     private static final double MAX_ZOOM = 32.0;
     private static final long FLUSH_INTERVAL_MS = 30;
 
-    private final Canvas canvas;
     private final RoomState roomState;
     private final DrawService drawService;
+    private final boolean readOnly;
 
     private double zoom = 8.0;
     private double offsetX = 0;
@@ -37,8 +36,10 @@ public class CanvasPane extends Pane {
     private double dragStartOffsetX;
     private double dragStartOffsetY;
     private boolean isDragging = false;
+    private boolean hasPanned = false;
 
     private volatile boolean dirty = true;
+    private boolean centered = false;
 
     private final List<PixelUpdate> pendingPixels = new ArrayList<>();
     private final ScheduledExecutorService flushScheduler = Executors.newSingleThreadScheduledExecutor(r -> {
@@ -49,45 +50,49 @@ public class CanvasPane extends Pane {
 
     private Color selectedColor = Color.BLACK;
 
-    public CanvasPane(RoomState roomState, DrawService drawService) {
+    public CanvasPane(RoomState roomState, DrawService drawService, boolean readOnly) {
         this.roomState = roomState;
         this.drawService = drawService;
+        this.readOnly = readOnly;
 
-        canvas = new Canvas();
-        canvas.widthProperty().bind(widthProperty());
-        canvas.heightProperty().bind(heightProperty());
-        getChildren().add(canvas);
+        widthProperty().addListener((obs, o, n) -> {
+            if (!centered && n.doubleValue() > 0 && getHeight() > 0) {
+                centerView();
+                centered = true;
+            } else if (!hasPanned) {
+                centerView();
+            }
+            dirty = true;
+        });
+        heightProperty().addListener((obs, o, n) -> {
+            if (!centered && n.doubleValue() > 0 && getWidth() > 0) {
+                centerView();
+                centered = true;
+            } else if (!hasPanned) {
+                centerView();
+            }
+            dirty = true;
+        });
 
-        widthProperty().addListener((obs, o, n) -> dirty = true);
-        heightProperty().addListener((obs, o, n) -> dirty = true);
-
-        canvas.setOnMousePressed(this::onMousePressed);
-        canvas.setOnMouseDragged(this::onMouseDragged);
-        canvas.setOnMouseReleased(this::onMouseReleased);
-        canvas.setOnScroll(this::onScroll);
-
-        roomState.getNicknames().addListener((javafx.collections.ListChangeListener<String>) c -> dirty = true);
+        setOnMousePressed(this::onMousePressed);
+        setOnMouseDragged(this::onMouseDragged);
+        setOnMouseReleased(this::onMouseReleased);
+        setOnScroll(this::onScroll);
+        setOnMouseClicked(this::onMouseClicked);
 
         startAnimationTimer();
-        startFlushScheduler();
-
-        centerCanvas();
+        if (!readOnly) {
+            startFlushScheduler();
+        }
     }
 
     public void setSelectedColor(Color color) {
         this.selectedColor = color;
     }
 
-    public void markDirty() {
-        dirty = true;
-    }
-
-    private void centerCanvas() {
-        widthProperty().addListener((obs, o, n) -> {
-            offsetX = (n.doubleValue() - roomState.getWidth() * zoom) / 2.0;
-            offsetY = (getHeight() - roomState.getHeight() * zoom) / 2.0;
-            dirty = true;
-        });
+    private void centerView() {
+        offsetX = (getWidth() - roomState.getWidth() * zoom) / 2.0;
+        offsetY = (getHeight() - roomState.getHeight() * zoom) / 2.0;
     }
 
     private void startAnimationTimer() {
@@ -116,9 +121,9 @@ public class CanvasPane extends Pane {
     }
 
     private void render() {
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-        double w = canvas.getWidth();
-        double h = canvas.getHeight();
+        GraphicsContext gc = getGraphicsContext2D();
+        double w = getWidth();
+        double h = getHeight();
 
         gc.setFill(Color.web("#e0e0e0"));
         gc.fillRect(0, 0, w, h);
@@ -129,7 +134,7 @@ public class CanvasPane extends Pane {
         for (int y = 0; y < canvasH; y++) {
             for (int x = 0; x < canvasW; x++) {
                 int argb = roomState.getPixel(x, y);
-                Color color = argb == 0 ? Color.WHITE : Color.rgb(
+                Color color = (argb == 0) ? Color.WHITE : Color.rgb(
                         (argb >> 16) & 0xFF,
                         (argb >> 8) & 0xFF,
                         argb & 0xFF
@@ -152,14 +157,15 @@ public class CanvasPane extends Pane {
     }
 
     private void onMousePressed(MouseEvent e) {
-        if (e.getButton() == MouseButton.MIDDLE ||
+        if (e.getButton() == MouseButton.SECONDARY ||
+                e.getButton() == MouseButton.MIDDLE ||
                 (e.getButton() == MouseButton.PRIMARY && e.isAltDown())) {
             isDragging = true;
             dragStartX = e.getX();
             dragStartY = e.getY();
             dragStartOffsetX = offsetX;
             dragStartOffsetY = offsetY;
-        } else if (e.getButton() == MouseButton.PRIMARY) {
+        } else if (e.getButton() == MouseButton.PRIMARY && !readOnly) {
             paintPixel(e.getX(), e.getY());
         }
     }
@@ -168,8 +174,9 @@ public class CanvasPane extends Pane {
         if (isDragging) {
             offsetX = dragStartOffsetX + (e.getX() - dragStartX);
             offsetY = dragStartOffsetY + (e.getY() - dragStartY);
+            hasPanned = true;
             dirty = true;
-        } else if (e.getButton() == MouseButton.PRIMARY) {
+        } else if (e.getButton() == MouseButton.PRIMARY && !readOnly) {
             paintPixel(e.getX(), e.getY());
         }
     }
@@ -178,11 +185,18 @@ public class CanvasPane extends Pane {
         isDragging = false;
     }
 
+    private void onMouseClicked(MouseEvent e) {
+        if (e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY) {
+            centerView();
+            hasPanned = false;
+            dirty = true;
+        }
+    }
+
     private void onScroll(ScrollEvent e) {
         double oldZoom = zoom;
         double delta = e.getDeltaY() > 0 ? 1.1 : 1.0 / 1.1;
         zoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom * delta));
-
         offsetX = e.getX() - (e.getX() - offsetX) * (zoom / oldZoom);
         offsetY = e.getY() - (e.getY() - offsetY) * (zoom / oldZoom);
         dirty = true;
@@ -208,7 +222,7 @@ public class CanvasPane extends Pane {
         int r = (int) (color.getRed() * 255);
         int g = (int) (color.getGreen() * 255);
         int b = (int) (color.getBlue() * 255);
-        return (r << 16) | (g << 8) | b;
+        return 0xFF000000 | (r << 16) | (g << 8) | b;
     }
 
     public void shutdown() {
