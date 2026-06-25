@@ -16,12 +16,11 @@ public class AppState {
 
     private final StringProperty token = new SimpleStringProperty(null);
     private final StringProperty nickname = new SimpleStringProperty(null);
+    private final StringProperty username = new SimpleStringProperty(null);
     private final ObjectProperty<RoomState> currentRoom = new SimpleObjectProperty<>(null);
     private final ObservableList<RoomInfo> rooms = FXCollections.observableArrayList();
     private final ObservableList<GalleryItem> gallery = FXCollections.observableArrayList();
-
-    private final BooleanProperty serverAvailable =
-            new SimpleBooleanProperty(false);
+    private final BooleanProperty serverAvailable = new SimpleBooleanProperty(false);
 
     public long getSessionId() { return sessionId; }
 
@@ -32,6 +31,10 @@ public class AppState {
     public String getNickname() { return nickname.get(); }
     public void setNickname(String nickname) { this.nickname.set(nickname); }
     public StringProperty nicknameProperty() { return nickname; }
+
+    public String getUsername() { return username.get(); }
+    public void setUsername(String username) { this.username.set(username); }
+    public StringProperty usernameProperty() { return username; }
 
     public RoomState getCurrentRoom() { return currentRoom.get(); }
     public void setCurrentRoom(RoomState room) { this.currentRoom.set(room); }
@@ -49,6 +52,7 @@ public class AppState {
     public void clear() {
         token.set(null);
         nickname.set(null);
+        username.set(null);
         currentRoom.set(null);
         rooms.clear();
         gallery.clear();

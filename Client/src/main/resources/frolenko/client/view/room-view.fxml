@@ -1,18 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.paint.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="frolenko.client.controller.RoomController"
-            style="-fx-background-color: #fff5f7;">
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="frolenko.client.controller.RoomController"
+      style="-fx-background-color: #fff5f7;">
 
-    <top>
-        <HBox spacing="10" alignment="CENTER_LEFT"
-              style="-fx-padding: 10 15; -fx-background-color: #fce4ec; -fx-border-color: #f8bbd0; -fx-border-width: 0 0 1 0;">
+    <ScrollPane hbarPolicy="AS_NEEDED" vbarPolicy="NEVER"
+                fitToWidth="true" fitToHeight="true"
+                minHeight="56" maxHeight="56" prefHeight="56"
+                style="-fx-background-color: #fce4ec; -fx-background: #fce4ec;
+                       -fx-border-color: #f8bbd0; -fx-border-width: 0 0 1 0;">
+        <HBox spacing="10" alignment="CENTER_LEFT" minWidth="620"
+              style="-fx-padding: 10 15; -fx-background-color: #fce4ec;">
 
-            <ColorPicker fx:id="colorPicker" style="-fx-background-color: #ffffff; -fx-border-color: #f8bbd0; -fx-border-radius: 4; -fx-background-radius: 4;"/>
+            <ColorPicker fx:id="colorPicker"
+                         style="-fx-background-color: #ffffff; -fx-border-color: #f8bbd0; -fx-border-radius: 4; -fx-background-radius: 4;"/>
 
             <Region HBox.hgrow="ALWAYS"/>
 
@@ -22,6 +26,8 @@
 
             <Region HBox.hgrow="ALWAYS"/>
 
+            <Button fx:id="copyCodeButton" text="Copy Code" onAction="#onCopyCode" visible="false" managed="false"
+                    style="-fx-background-color: #fce4ec; -fx-border-color: #f06292; -fx-border-radius: 4; -fx-background-radius: 4; -fx-text-fill: #880e4f; -fx-font-weight: bold; -fx-padding: 5 12;"/>
             <Button fx:id="saveButton" text="Save" onAction="#onSave" visible="false" managed="false"
                     style="-fx-background-color: #fce4ec; -fx-border-color: #f06292; -fx-border-radius: 4; -fx-background-radius: 4; -fx-text-fill: #880e4f; -fx-font-weight: bold; -fx-padding: 5 12;"/>
             <Button fx:id="closeRoomButton" text="Close Room" onAction="#onCloseRoom" visible="false" managed="false"
@@ -29,10 +35,8 @@
             <Button fx:id="leaveButton" text="Leave" onAction="#onLeave"
                     style="-fx-background-color: #f06292; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 4; -fx-padding: 5 12;"/>
         </HBox>
-    </top>
+    </ScrollPane>
 
-    <center>
-        <AnchorPane fx:id="canvasContainer" style="-fx-background-color: #e0e0e0;"/>
-    </center>
+    <AnchorPane fx:id="canvasContainer" VBox.vgrow="ALWAYS" style="-fx-background-color: #e0e0e0;"/>
 
-</BorderPane>
+</VBox>

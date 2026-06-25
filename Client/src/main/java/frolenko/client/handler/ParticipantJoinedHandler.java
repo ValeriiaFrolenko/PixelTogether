@@ -28,6 +28,10 @@ public class ParticipantJoinedHandler implements Consumer<Packet> {
 
         ParticipantEvent event = JsonUtil.fromBytes(packet.bMsg().payload(), ParticipantEvent.class);
 
-        Platform.runLater(() -> room.getNicknames().add(event.nickname()));
+        Platform.runLater(() -> {
+            if (!room.getNicknames().contains(event.nickname())) {
+                room.getNicknames().add(event.nickname());
+            }
+        });
     }
 }

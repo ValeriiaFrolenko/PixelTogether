@@ -18,6 +18,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 
@@ -36,6 +38,7 @@ public class RoomController {
     @FXML private Button saveButton;
     @FXML private Button closeRoomButton;
     @FXML private Button leaveButton;
+    @FXML private Button copyCodeButton;
 
     private CanvasPane canvasPane;
     private boolean listenerRegistered = false;
@@ -84,18 +87,40 @@ public class RoomController {
         closeRoomButton.setVisible(room.isOwner());
         closeRoomButton.setManaged(room.isOwner());
 
+        // Copy Code показується тільки якщо кімната приватна (є код)
+        boolean hasCode = room.getCode() != null;
+        copyCodeButton.setVisible(hasCode);
+        copyCodeButton.setManaged(hasCode);
+
         if (canvasPane != null) {
             canvasPane.shutdown();
             canvasContainer.getChildren().clear();
         }
 
         canvasPane = new CanvasPane(room, drawService, false);
+
+        AnchorPane.setTopAnchor(canvasPane, 0.0);
+        AnchorPane.setBottomAnchor(canvasPane, 0.0);
+        AnchorPane.setLeftAnchor(canvasPane, 0.0);
+        AnchorPane.setRightAnchor(canvasPane, 0.0);
+
         canvasPane.widthProperty().bind(canvasContainer.widthProperty());
         canvasPane.heightProperty().bind(canvasContainer.heightProperty());
+
         canvasPane.setSelectedColor(colorPicker.getValue());
         colorPicker.setOnAction(e -> canvasPane.setSelectedColor(colorPicker.getValue()));
 
         canvasContainer.getChildren().add(canvasPane);
+    }
+
+    @FXML
+    public void onCopyCode() {
+        RoomState room = appState.getCurrentRoom();
+        if (room == null || room.getCode() == null) return;
+        ClipboardContent content = new ClipboardContent();
+        content.putString(room.getCode());
+        Clipboard.getSystemClipboard().setContent(content);
+        AlertHelper.showInfo("Copied", "Room code copied to clipboard: " + room.getCode());
     }
 
     @FXML

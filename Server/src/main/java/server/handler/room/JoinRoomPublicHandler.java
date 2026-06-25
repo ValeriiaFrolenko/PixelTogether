@@ -70,7 +70,7 @@ public class JoinRoomPublicHandler extends BaseHandler {
                 .keySet()
                 .stream()
                 .map(participantManager::get)
-                .filter(n -> n != null && !n.equals(nickname))
+                .filter(n -> n != null)
                 .toList();
 
         CanvasStateResponse canvasState = roomManager.getCanvasState(roomId);

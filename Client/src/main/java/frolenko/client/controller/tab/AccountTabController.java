@@ -145,7 +145,7 @@ public class AccountTabController {
                 work -> Platform.runLater(() -> {
                     unblock.run();
                     viewManager.navigateTo(AppView.WORK_VIEW);
-                    appState.setCurrentRoom(new RoomState(-1, work.canvasW(), work.canvasH(), work.pixels(), false));
+                    appState.setCurrentRoom(new RoomState(-1, work.canvasW(), work.canvasH(), work.pixels(), false, null));
                 }),
                 error -> Platform.runLater(() -> {
                     unblock.run();
@@ -238,6 +238,7 @@ public class AccountTabController {
                 token -> Platform.runLater(() -> {
                     unblock.run();
                     appState.setToken(token);
+                    appState.setUsername(username);
                     usernameLabel.setText(username);
                     authErrorLabel.setText("");
                     passwordField.clear();
@@ -262,6 +263,7 @@ public class AccountTabController {
                 token -> Platform.runLater(() -> {
                     unblock.run();
                     appState.setToken(token);
+                    appState.setUsername(username);
                     usernameLabel.setText(username);
                     authErrorLabel.setText("");
                     passwordField.clear();
@@ -280,6 +282,7 @@ public class AccountTabController {
                 () -> Platform.runLater(() -> {
                     unblock.run();
                     appState.setToken(null);
+                    appState.setUsername(null);
                     usernameLabel.setText("");
                 }),
                 error -> Platform.runLater(() -> {

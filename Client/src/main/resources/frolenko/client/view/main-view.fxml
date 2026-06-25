@@ -3,29 +3,33 @@
 <?import javafx.scene.layout.*?>
 <?import java.net.URL?>
 
-<VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      fx:controller="frolenko.client.controller.MainController"
-      style="-fx-background-color: #fff5f7;">
+<ScrollPane fitToWidth="true" fitToHeight="true"
+            style="-fx-background-color: #fff5f7; -fx-background: #fff5f7;"
+            xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="frolenko.client.controller.MainController">
 
     <stylesheets>
-        <URL value="@styles.css" />
+        <URL value="@styles.css"/>
     </stylesheets>
 
-    <Label fx:id="serverBanner" text="Server unavailable" managed="false" visible="false"
-           maxWidth="Infinity"
-           style="-fx-background-color: #d32f2f; -fx-text-fill: white; -fx-padding: 8; -fx-font-weight: bold; -fx-alignment: CENTER;"/>
+    <VBox style="-fx-background-color: #fff5f7;" minHeight="400" minWidth="600">
 
-    <TabPane VBox.vgrow="ALWAYS" tabClosingPolicy="UNAVAILABLE" styleClass="custom-tab-pane">
-        <Tab text="Rooms">
-            <fx:include source="tab/rooms-tab.fxml"/>
-        </Tab>
-        <Tab text="Gallery">
-            <fx:include source="tab/gallery-tab.fxml"/>
-        </Tab>
-        <Tab text="Account">
-            <fx:include source="tab/account-tab.fxml"/>
-        </Tab>
-    </TabPane>
+        <Label fx:id="serverBanner" text="Server unavailable" managed="false" visible="false"
+               maxWidth="Infinity"
+               style="-fx-background-color: #d32f2f; -fx-text-fill: white; -fx-padding: 8; -fx-font-weight: bold; -fx-alignment: CENTER;"/>
 
-</VBox>
+        <TabPane VBox.vgrow="ALWAYS" tabClosingPolicy="UNAVAILABLE" styleClass="custom-tab-pane">
+            <Tab text="Rooms">
+                <fx:include source="tab/rooms-tab.fxml"/>
+            </Tab>
+            <Tab text="Gallery">
+                <fx:include source="tab/gallery-tab.fxml"/>
+            </Tab>
+            <Tab text="Account">
+                <fx:include source="tab/account-tab.fxml"/>
+            </Tab>
+        </TabPane>
+
+    </VBox>
+</ScrollPane>

@@ -21,12 +21,14 @@ public class MainController {
 
     @FXML
     public void initialize() {
-        appState.serverAvailableProperty().addListener((obs, old, available) -> {
-            serverBanner.setVisible(!available);
-            serverBanner.setManaged(!available);
-            if (!available) {
-                ((VBox) serverBanner.getParent()).getChildren().forEach(node -> node.setDisable(false));
-            }
-        });
+        updateBanner(appState.isServerAvailable());
+
+        appState.serverAvailableProperty().addListener((obs, old, available) ->
+                updateBanner(available));
+    }
+
+    private void updateBanner(boolean available) {
+        serverBanner.setVisible(!available);
+        serverBanner.setManaged(!available);
     }
 }

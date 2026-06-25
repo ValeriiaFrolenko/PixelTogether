@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import common.dto.ErrorResponse;
 import common.dto.room.CanvasStateResponse;
+import common.dto.room.CreateRoomResponse;
 import common.dto.room.MyRoomInfo;
 import common.dto.room.RoomInfo;
 import common.protocol.CommandType;
@@ -53,7 +54,7 @@ public class RoomService {
         serverApi.joinPublic(roomId, packet -> {
             if (packet.bMsg().cType() == CommandType.CANVAS_STATE.getCode()) {
                 CanvasStateResponse canvas = JsonUtil.fromBytes(packet.bMsg().payload(), CanvasStateResponse.class);
-                RoomState room = new RoomState(roomId, canvas.width(), canvas.height(), canvas.pixels(), canvas.isOwner());
+                RoomState room = new RoomState(roomId, canvas.width(), canvas.height(), canvas.pixels(), canvas.isOwner(), null);
                 if (canvas.nicknames() != null) {
                     room.getNicknames().addAll(canvas.nicknames());
                 }
@@ -69,7 +70,8 @@ public class RoomService {
         serverApi.joinPrivate(code, packet -> {
             if (packet.bMsg().cType() == CommandType.CANVAS_STATE.getCode()) {
                 CanvasStateResponse canvas = JsonUtil.fromBytes(packet.bMsg().payload(), CanvasStateResponse.class);
-                RoomState room = new RoomState(packet.bMsg().roomId(), canvas.width(), canvas.height(), canvas.pixels(), canvas.isOwner());
+                // передаємо code щоб власник міг скопіювати його з кімнати
+                RoomState room = new RoomState(packet.bMsg().roomId(), canvas.width(), canvas.height(), canvas.pixels(), canvas.isOwner(), code);
                 if (canvas.nicknames() != null) {
                     room.getNicknames().addAll(canvas.nicknames());
                 }
@@ -86,7 +88,14 @@ public class RoomService {
                            Consumer<RoomState> onSuccess, Consumer<String> onError) {
         serverApi.createRoom(token, name, canvasW, canvasH, isPrivate, durationMinutes, packet -> {
             if (packet.bMsg().cType() == CommandType.OK.getCode()) {
-                RoomState room = new RoomState(packet.bMsg().roomId(), canvasW, canvasH, new int[canvasW * canvasH], true);
+                CreateRoomResponse response = JsonUtil.fromBytes(packet.bMsg().payload(), CreateRoomResponse.class);
+                String code = response.code(); // null якщо публічна
+                RoomState room = new RoomState(packet.bMsg().roomId(), canvasW, canvasH, new int[canvasW * canvasH], true, code);
+                // додаємо власне ім'я одразу — сервер не надсилає PARTICIPANT_JOINED собі самому при створенні
+                String username = appState.getUsername();
+                if (username != null && !username.isBlank()) {
+                    room.getNicknames().add(username);
+                }
                 appState.setCurrentRoom(room);
                 onSuccess.accept(room);
             } else {
